@@ -1043,20 +1043,26 @@ function teamLogo(name) {
 
 function renderSidebar() {
   if (!appData?.schedule) {
-    document.getElementById('sidebar').style.display = 'none';
+    const sidebarEl = document.getElementById('sidebar');
+    if (sidebarEl) sidebarEl.style.display = 'none';
     return;
   }
 
-  // Determine which day to show: today (ET), or closest upcoming
-  const now = new Date();
-  // Approximate ET offset (UTC-5 during EDT, UTC-4 during EST — March is EDT)
-  const etOffset = -4;
-  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const etNow = new Date(utcMs + (etOffset * 3600000));
-  const todayStr = etNow.toISOString().slice(0, 10);
+  // Determine today's date in Eastern Time
+  // Use Intl API for reliable timezone conversion
+  let todayStr;
+  try {
+    const etFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+    todayStr = etFormatter.format(new Date()); // returns YYYY-MM-DD format (en-CA locale)
+  } catch(e) {
+    // Fallback: manual ET offset (EDT = UTC-4)
+    const now = new Date();
+    const etNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (-4 * 3600000));
+    todayStr = etNow.toISOString().slice(0, 10);
+  }
 
   const dates = Object.keys(appData.schedule).sort();
-  // Show today if available, otherwise show next upcoming, otherwise show most recent
+  // Priority: show today if available, then next upcoming day, then most recent day
   let dateKey = dates.find(d => d === todayStr)
     || dates.find(d => d > todayStr)
     || dates[dates.length - 1];
@@ -1085,10 +1091,12 @@ function renderSidebar() {
     const cls2 = winner ? (winner === t2 ? 'winner' : 'loser') : '';
 
     const metaHtml = winner
-      ? '<span class="sg-final">Final</span>'
+      ? '<span class="sg-final">✓ Final</span>'
       : '<span class="sg-time">' + sg.time + '</span><span class="sg-tv">' + sg.tv + '</span>';
 
-    return '<div class="sg-item">' +
+    const rowCls = winner ? 'sg-item sg-done' : 'sg-item';
+
+    return '<div class="' + rowCls + '">' +
       '<div class="sg-teams">' +
         '<div class="sg-team ' + cls1 + '">' +
           (logo1 ? '<img class="sg-logo" src="' + logo1 + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
