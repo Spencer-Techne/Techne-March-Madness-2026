@@ -372,6 +372,46 @@ select:focus { border-color: var(--orange); }
 .instr-box ol { font-family: var(--fm); font-size: 16px; color: var(--muted); padding-left: 16px; line-height: 1.8; }
 .instr-box code { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
 
+/* HUMANS vs AI BAR */
+.hva { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; }
+.hva-labels { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.hva-side { font-family: var(--fd); font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.06em; }
+.hva-side .hva-pts { font-size: 26px; }
+.hva-human { color: var(--text); }
+.hva-ai { color: var(--cyan); }
+.hva-track { height: 10px; background: rgba(0,212,255,0.15); border-radius: 5px; overflow: hidden; position: relative; }
+.hva-fill { height: 100%; background: linear-gradient(90deg, var(--orange), #ff7530); border-radius: 5px; transition: width 0.6s ease; min-width: 2px; }
+.hva-mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--muted); opacity: 0.3; }
+
+/* RANK CHANGE ARROWS */
+.lb-rank-change { font-family: var(--fm); font-size: 12px; font-weight: 600; margin-left: 2px; }
+.lb-rank-change.up { color: var(--green); }
+.lb-rank-change.down { color: var(--red); }
+.lb-rank-change.same { color: var(--muted); opacity: 0.4; }
+
+/* CHAMPION LOGO ON LEADERBOARD */
+.lb-champ { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+.lb-champ-logo { width: 18px; height: 18px; border-radius: 3px; object-fit: contain; }
+.lb-champ-name { font-family: var(--fm); font-size: 12px; color: var(--muted); }
+.lb-champ-name.eliminated { color: var(--red); text-decoration: line-through; opacity: 0.6; }
+.lb-champ-name.alive { color: var(--text); }
+
+/* CALLOUTS */
+.lb-callouts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.callout { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 200px; }
+.callout-icon { font-size: 18px; margin-bottom: 4px; }
+.callout-label { font-family: var(--fm); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.callout-text { font-family: var(--fd); font-weight: 700; font-size: 17px; color: var(--text); }
+.callout-sub { font-family: var(--fm); font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* BRACKET STILL-ALIVE INDICATOR */
+.slot-alive    { border-color: rgba(212,146,42,0.25); background: rgba(212,146,42,0.04); }
+.slot-alive    .bkt-name { color: var(--text); }
+.slot-alive    .bkt-ico  { color: var(--gold); opacity: 0.6; }
+.slot-elim     { border-color: rgba(239,68,68,0.15); background: rgba(239,68,68,0.03); }
+.slot-elim     .bkt-name { color: var(--muted); opacity: 0.5; text-decoration: line-through; text-decoration-color: rgba(239,68,68,0.3); }
+.slot-elim     .bkt-ico  { color: var(--red); opacity: 0.4; }
+
 /* ====== TODAY'S GAMES SIDEBAR ====== */
 .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
 .sidebar::-webkit-scrollbar { width: 4px; }
@@ -448,7 +488,9 @@ select:focus { border-color: var(--orange); }
       <div class="section-title">Leaderboard</div>
     </div>
     <div class="section-meta" id="lb-meta">Loading...</div>
+    <div id="hva-bar"></div>
     <div class="round-pills" id="round-pills"></div>
+    <div id="lb-callouts"></div>
     <div class="lb-list" id="lb-list">
       <div class="loading">Loading bracket data...</div>
     </div>
