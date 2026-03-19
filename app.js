@@ -239,6 +239,11 @@ function showView(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.getElementById('nav-'  + name).classList.add('active');
+  // Clear champion sidebar card when not on bracket view
+  if (name !== 'bracket') {
+    const champEl = document.getElementById('sidebar-champ');
+    if (champEl) champEl.innerHTML = '';
+  }
 }
 
 // ============================================================
@@ -566,14 +571,22 @@ function renderBracket() {
   </div>`;
 
   const champ = picks['NC'], actual = results['NC'];
-  const champColor = actual ? (champ===actual?'var(--green)':'var(--red)') : (p.color||'var(--orange)');
-  const champHtml = `<div class="champ-display">
-    <div class="champ-lbl">${actual?'🏆 Actual Champion':'🎯 Predicted Champion'}</div>
-    <div class="champ-team" style="color:${champColor}">${esc(champ)||'Not picked'}</div>
-    ${actual&&champ!==actual?`<div style="margin-top:8px;font-family:var(--fm);font-size:16px;color:var(--muted)">Actual: ${esc(actual)}</div>`:''}
-  </div>`;
+  const champColor = actual ? (champ===actual?'var(--green)':'var(--red)') : 'var(--gold)';
+  const champCls = actual ? (champ===actual?'correct':'wrong') : '';
+  const champLogo = teamLogo(champ);
+  const champEl = document.getElementById('sidebar-champ');
+  if (champ) {
+    champEl.innerHTML = `<div class="sidebar-champ-card">
+      <div class="sidebar-champ-lbl">${actual?'🏆 Actual Champion':'🎯 Predicted Champion'}</div>
+      <div class="sidebar-champ-team ${champCls}">${esc(champ)}</div>
+      ${champLogo ? `<img class="sidebar-champ-logo" src="${champLogo}" alt="${esc(champ)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      ${actual&&champ!==actual?`<div class="sidebar-champ-actual">Actual: ${esc(actual)}</div>`:''}
+    </div>`;
+  } else {
+    champEl.innerHTML = '';
+  }
 
-  el.innerHTML = statsHtml + regHtml + ffHtml + champHtml;
+  el.innerHTML = statsHtml + regHtml + ffHtml;
 }
 
 // ============================================================
