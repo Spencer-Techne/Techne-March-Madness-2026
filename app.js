@@ -779,9 +779,17 @@ function loadGhConfig() {
       if (ghConfig.owner && ghConfig.repo && ghConfig.token) {
         setGhStatus('ok', `${ghConfig.owner}/${ghConfig.repo}`);
         document.getElementById('gh-config').style.display = 'none';
+      } else {
+        setGhStatus('err', 'Configure GitHub first');
+        document.getElementById('gh-config').style.display = 'block';
       }
+    } else {
+      // No saved config — show the form
+      document.getElementById('gh-config').style.display = 'block';
     }
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('gh-config').style.display = 'block';
+  }
 }
 
 function saveGhConfig() {
