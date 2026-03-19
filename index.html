@@ -575,7 +575,7 @@ select:focus { border-color: var(--orange); }
       <div class="admin-header">
         <h2>⚙ Admin Panel</h2>
         <div style="display:flex;gap:10px;align-items:center">
-          <div class="gh-status">
+          <div class="gh-status" onclick="toggleGhConfig()" style="cursor:pointer" title="Click to configure">
             <div class="gh-dot" id="gh-dot"></div>
             <span id="gh-status-label">Not configured</span>
           </div>
