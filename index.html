@@ -371,6 +371,13 @@ select:focus { border-color: var(--orange); }
 .instr-box ol { font-family: var(--fm); font-size: 16px; color: var(--muted); padding-left: 16px; line-height: 1.8; }
 .instr-box code { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
 
+/* PAGE BANNER TITLE */
+.page-banner {
+  font-family: var(--fd); font-weight: 900; font-size: 56px;
+  text-transform: uppercase; letter-spacing: 0.04em; line-height: 1;
+  color: var(--text); margin-bottom: 28px;
+}
+
 /* ====== TODAY'S GAMES SIDEBAR ====== */
 .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
 .sidebar::-webkit-scrollbar { width: 4px; }
@@ -439,6 +446,8 @@ select:focus { border-color: var(--orange); }
   </aside>
 
   <div class="main-content">
+
+  <div class="page-banner">Techne 2026 Bracket Challenge</div>
 
   <!-- ============ LEADERBOARD ============ -->
   <div class="view active" id="view-leaderboard">
