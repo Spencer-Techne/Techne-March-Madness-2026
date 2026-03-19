@@ -97,6 +97,7 @@ const RSHORT  = { r1:'R64', r2:'R32', s16:'S16', e8:'E8', ff2:'FF', nc:'NC' };
 // ============================================================
 let appData = null;
 let wiz = { step:0, name:'', picks:{} };
+let prevRanks = {}; // track previous ranks for arrows
 
 const WSTEPS = [
   { title:'Who Are You?',          type:'name' },
@@ -203,6 +204,26 @@ function accuracy(picks, results) {
   return { correct, played };
 }
 
+// Check if a team has been eliminated from the tournament
+function isTeamEliminated(team, results) {
+  if (!team || !results) return false;
+  for (const [gid, winner] of Object.entries(results)) {
+    const g = GAMES[gid];
+    if (!g) continue;
+    const [t1, t2] = getTeams(gid, null, results);
+    // If the team was in this game and lost
+    if ((t1 === team || t2 === team) && winner !== team) return true;
+  }
+  return false;
+}
+
+// Check if a pick is still alive (team hasn't been eliminated yet and game not yet played)
+function isPickStillAlive(gid, pick, results) {
+  if (!pick || !results) return true;
+  if (results[gid]) return false; // game already played
+  return !isTeamEliminated(pick, results);
+}
+
 function hasPicks(p) { return p.submitted && p.picks && Object.keys(p.picks).length > 0; }
 
 function esc(s) {
@@ -264,7 +285,7 @@ function renderLeaderboard() {
   const results = appData.results || {};
 
   const rows = appData.participants.map(p => ({
-    ...p, sc: score(p.picks, results)
+    ...p, sc: score(p.picks, results), acc: accuracy(p.picks, results)
   }));
 
   rows.sort((a,b) => {
@@ -274,14 +295,99 @@ function renderLeaderboard() {
     return b.sc.total - a.sc.total;
   });
 
+  // === HUMANS vs AI BAR ===
+  let humanPts = 0, humanCount = 0, aiPts = 0, aiCount = 0;
+  rows.forEach(p => {
+    if (!hasPicks(p)) return;
+    if (p.type === 'ai') { aiPts += p.sc.total; aiCount++; }
+    else { humanPts += p.sc.total; humanCount++; }
+  });
+  const totalPts = humanPts + aiPts;
+  const humanPct = totalPts > 0 ? (humanPts / totalPts * 100) : 50;
+  const hvaEl = document.getElementById('hva-bar');
+  if (humanCount > 0 && aiCount > 0) {
+    hvaEl.innerHTML = `<div class="hva">
+      <div class="hva-labels">
+        <div class="hva-side hva-human">👤 Humans <span class="hva-pts">${humanPts}</span></div>
+        <div class="hva-side hva-ai"><span class="hva-pts">${aiPts}</span> ⚡ AI</div>
+      </div>
+      <div class="hva-track"><div class="hva-fill" style="width:${humanPct}%"></div><div class="hva-mid"></div></div>
+    </div>`;
+  } else { hvaEl.innerHTML = ''; }
+
+  // === BEST PICK / WORST MISS CALLOUTS ===
+  const calloutsEl = document.getElementById('lb-callouts');
+  const playedGames = Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]);
+  if (playedGames.length > 0) {
+    // Best pick: highest point single correct pick, with who got it
+    let bestPick = null;
+    let bestPts = 0;
+    let bestWho = [];
+    let worstGame = null;
+    let worstMissCount = 0;
+    for (const gid of playedGames) {
+      const g = GAMES[gid];
+      const pts = RPTS[g.round] || 0;
+      let gotIt = [], missedIt = [];
+      rows.forEach(p => {
+        if (!hasPicks(p)) return;
+        if (p.picks[gid] === results[gid]) gotIt.push(p.name);
+        else missedIt.push(p.name);
+      });
+      // Best pick = fewest people got it right AND high points
+      if (gotIt.length > 0 && gotIt.length <= 3 && pts >= bestPts) {
+        bestPts = pts; bestPick = gid; bestWho = gotIt;
+      }
+      // Worst miss = most people got it wrong
+      if (missedIt.length > worstMissCount) {
+        worstMissCount = missedIt.length; worstGame = gid;
+      }
+    }
+    let calloutsHtml = '<div class="lb-callouts">';
+    if (bestPick && bestWho.length > 0 && bestWho.length < rows.filter(p=>hasPicks(p)).length) {
+      calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called ${esc(results[bestPick])} in ${bestPick} (+${bestPts} pts)</div></div>`;
+    }
+    if (worstGame && worstMissCount > rows.filter(p=>hasPicks(p)).length / 2) {
+      const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
+      calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
+    }
+    calloutsHtml += '</div>';
+    calloutsEl.innerHTML = (bestPick || worstGame) ? calloutsHtml : '';
+  } else { calloutsEl.innerHTML = ''; }
+
+  // === LEADERBOARD ROWS ===
   const RORDER = ['r1','r2','s16','e8','ff2','nc'];
   let rank = 0;
+  const newRanks = {};
   const html = rows.map((p, i) => {
     const has = hasPicks(p);
     if (has) rank++;
     const rankDisp = has ? rank : '—';
     const rankCls  = has ? (rank===1?'r1':rank===2?'r2':rank===3?'r3':'') : '';
     const aiCls    = p.type==='ai' ? 'ai' : '';
+
+    // Track rank for arrows
+    if (has) newRanks[p.id] = rank;
+
+    // Rank change arrow
+    let arrowHtml = '';
+    if (has && prevRanks[p.id] !== undefined) {
+      const diff = prevRanks[p.id] - rank;
+      if (diff > 0) arrowHtml = `<span class="lb-rank-change up">▲${diff}</span>`;
+      else if (diff < 0) arrowHtml = `<span class="lb-rank-change down">▼${Math.abs(diff)}</span>`;
+      else arrowHtml = `<span class="lb-rank-change same">—</span>`;
+    }
+
+    // Champion pick with logo and elimination status
+    let champHtml = '';
+    if (has && p.picks?.NC) {
+      const champ = p.picks.NC;
+      const logo = teamLogo(champ);
+      const elim = isTeamEliminated(champ, results);
+      const cls = elim ? 'eliminated' : 'alive';
+      champHtml = `<div class="lb-champ">${logo ? `<img class="lb-champ-logo" src="${logo}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}` +
+        `<span class="lb-champ-name ${cls}">${elim ? '✗ ' : '🏆 '}${esc(champ)}</span></div>`;
+    }
 
     const breakdown = has ? RORDER.map(r => {
       const pts = p.sc.by[r] || 0;
@@ -295,9 +401,10 @@ function renderLeaderboard() {
 
     return `
       <div class="lb-row ${rankCls} ${aiCls}" style="${delay}" onclick="viewBkt('${p.id}')">
-        <div class="lb-rank">${rankDisp}</div>
+        <div class="lb-rank">${rankDisp}${arrowHtml}</div>
         <div class="lb-info">
           <div class="lb-name">${esc(p.name)} ${badge}</div>
+          ${champHtml}
           <div class="lb-breakdown">${breakdown}</div>
         </div>
         <div class="lb-score">
@@ -306,6 +413,9 @@ function renderLeaderboard() {
         </div>
       </div>`;
   }).join('');
+
+  // Store ranks for next render
+  prevRanks = newRanks;
 
   document.getElementById('lb-list').innerHTML = html || '<div class="empty-state">No participants yet</div>';
 }
@@ -328,7 +438,7 @@ function makeBracketSVG(sourceGameH, numSourceGames) {
   return '<svg width="' + W + '" height="' + H + '" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="' + paths.join(' ') + '" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 
-function renderBktSlot(team, seed, pick, result) {
+function renderBktSlot(team, seed, pick, result, allResults) {
   if (!team || team === 'TBD') {
     return `<div class="bkt-slot slot-tbd"><span class="bkt-name">TBD</span></div>`;
   }
@@ -337,6 +447,12 @@ function renderBktSlot(team, seed, pick, result) {
   let cls = 'slot-dim', ico = '';
   if      (isPick && isResult)       { cls = 'slot-correct'; ico = '✓'; }
   else if (isPick && result)         { cls = 'slot-wrong';   ico = '✗'; }
+  else if (isPick && !result && allResults) {
+    // Game not yet played — check if this pick is still alive
+    const elim = isTeamEliminated(team, allResults);
+    if (elim) { cls = 'slot-elim'; ico = '✗'; }
+    else      { cls = 'slot-alive'; ico = '●'; }
+  }
   else if (isPick)                   { cls = 'slot-pick';    ico = '●'; }
   else if (isResult)                 { cls = 'slot-actual'; }
   const icoHtml = ico ? `<span class="bkt-ico">${ico}</span>` : '';
@@ -349,8 +465,8 @@ function renderBktGame(gid, picks, results) {
   const s1 = g.src ? null : g.tSeed;
   const s2 = g.src ? null : g.bSeed;
   return `<div class="bkt-game">
-    ${renderBktSlot(t1, s1, picks?.[gid], results?.[gid])}
-    ${renderBktSlot(t2, s2, picks?.[gid], results?.[gid])}
+    ${renderBktSlot(t1, s1, picks?.[gid], results?.[gid], results)}
+    ${renderBktSlot(t2, s2, picks?.[gid], results?.[gid], results)}
   </div>`;
 }
 
@@ -436,15 +552,15 @@ function renderBracket() {
     <div class="bkt-ff-card">
       <div class="region-head">🏟️ ${GAMES.FF5.label}</div>
       <div class="bkt-ff-inner">
-        ${renderBktSlot(ff5t[0], null, picks['FF5'], results['FF5'])}
-        ${renderBktSlot(ff5t[1], null, picks['FF5'], results['FF5'])}
+        ${renderBktSlot(ff5t[0], null, picks['FF5'], results['FF5'], results)}
+        ${renderBktSlot(ff5t[1], null, picks['FF5'], results['FF5'], results)}
       </div>
     </div>
     <div class="bkt-ff-card">
       <div class="region-head">🏟️ ${GAMES.FF6.label}</div>
       <div class="bkt-ff-inner">
-        ${renderBktSlot(ff6t[0], null, picks['FF6'], results['FF6'])}
-        ${renderBktSlot(ff6t[1], null, picks['FF6'], results['FF6'])}
+        ${renderBktSlot(ff6t[0], null, picks['FF6'], results['FF6'], results)}
+        ${renderBktSlot(ff6t[1], null, picks['FF6'], results['FF6'], results)}
       </div>
     </div>
   </div>`;
@@ -806,6 +922,13 @@ async function pushResults() {
     return;
   }
 
+  // Build confirmation summary
+  const resultKeys = Object.keys(pendingResults).filter(k => k !== '__names_updated');
+  if (resultKeys.length > 0) {
+    const summary = resultKeys.map(gid => `${gid}: ${pendingResults[gid]}`).join('\n');
+    if (!confirm(`Push ${resultKeys.length} result${resultKeys.length===1?'':'s'}?\n\n${summary}\n\nConfirm?`)) return;
+  }
+
   const statusEl = document.getElementById('push-status');
   const btn      = document.getElementById('push-btn');
   statusEl.textContent = 'Pushing…';
@@ -965,6 +1088,21 @@ function renderSidebar() {
 }
 
 // ============================================================
-// BOOT
+// BOOT + AUTO-REFRESH
 // ============================================================
-window.addEventListener('DOMContentLoaded', loadData);
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  // Auto-refresh every 60 seconds
+  setInterval(() => {
+    fetch('data.json?_=' + Date.now())
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        appData = data;
+        renderPills();
+        renderLeaderboard();
+        renderSidebar();
+      })
+      .catch(() => {}); // silent fail on auto-refresh
+  }, 60000);
+});
