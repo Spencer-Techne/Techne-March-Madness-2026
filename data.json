@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-18"
+    "updated": "2026-03-19"
   },
   "participants": [
     {
@@ -784,7 +784,14 @@
   "results": {
     "FF1": "Texas",
     "FF2": "Howard",
-    "FF3": "Miami (OH)"
+    "FF3": "Miami (OH)",
+    "FF4": "Prairie View",
+    "E1": "Duke",
+    "E2": "TCU",
+    "E5": "Louisville",
+    "W3": "High Point",
+    "S4": "Nebraska",
+    "S3": "Vanderbilt"
   },
   "schedule": {
     "2026-03-19": {
