@@ -129,7 +129,7 @@ async function loadData() {
     onLoaded();
   } catch(e) {
     document.getElementById('lb-list').innerHTML =
-      `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px 20px;font-family:var(--fm);font-size:11px;color:var(--red)">
+      `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px 20px;font-family:var(--fm);font-size:16px;color:var(--red)">
         ⚠️ Could not load data.json. Make sure it's in the same folder as index.html.<br>
         If running locally, use a dev server (e.g. <code>python3 -m http.server</code>).
       </div>`;
@@ -377,7 +377,7 @@ function renderRegion(region, meta, picks, results) {
   allRoundGames.forEach(gid => {
     if (results[gid] && picks?.[gid] === results[gid]) regionPts += RPTS[GAMES[gid].round];
   });
-  const ptsBadge = regionPts > 0 ? `<span style="font-family:var(--fm);font-size:9px;color:var(--orange);font-weight:600">${regionPts} pts</span>` : '';
+  const ptsBadge = regionPts > 0 ? `<span style="font-family:var(--fm);font-size:14px;color:var(--orange);font-weight:600">${regionPts} pts</span>` : '';
 
   return `<div class="bkt-region-wrap">
     <div class="bkt-region-head"><span>${meta.emoji} ${meta.label}</span>${ptsBadge}</div>
@@ -390,7 +390,7 @@ function gameLineHtml(gid, picks, results) {
   const [t1, t2] = getTeams(gid, picks, results);
   const pick = picks?.[gid], result = results?.[gid];
   function chip(team) {
-    if (!team || team==='TBD') return `<span style="color:var(--muted);font-style:italic;font-size:12px">TBD</span>`;
+    if (!team || team==='TBD') return `<span style="color:var(--muted);font-style:italic;font-size:17px">TBD</span>`;
     const isPick = pick===team, isResult = result===team;
     let cls;
     if (isPick && result) cls = pick===result ? 'tc-correct' : 'tc-wrong';
@@ -454,7 +454,7 @@ function renderBracket() {
   const champHtml = `<div class="champ-display">
     <div class="champ-lbl">${actual?'🏆 Actual Champion':'🎯 Predicted Champion'}</div>
     <div class="champ-team" style="color:${champColor}">${esc(champ)||'Not picked'}</div>
-    ${actual&&champ!==actual?`<div style="margin-top:8px;font-family:var(--fm);font-size:11px;color:var(--muted)">Actual: ${esc(actual)}</div>`:''}
+    ${actual&&champ!==actual?`<div style="margin-top:8px;font-family:var(--fm);font-size:16px;color:var(--muted)">Actual: ${esc(actual)}</div>`:''}
   </div>`;
 
   el.innerHTML = statsHtml + regHtml + ffHtml + champHtml;
@@ -711,7 +711,7 @@ function renderAdminRounds() {
       const s1 = g?.tSeed; const s2 = g?.bSeed;
       const tbd = t1==='TBD'||t2==='TBD';
 
-      const pendBadge = isPend ? `<span style="font-family:var(--fm);font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em"> ●PENDING</span>` : '';
+      const pendBadge = isPend ? `<span style="font-family:var(--fm);font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em"> ●PENDING</span>` : '';
       const clearBtn  = winner ? `<button class="clear-btn" onclick="clearResult('${gid}')" title="Clear result">✕</button>` : '';
 
       const btn1cls = winner ? (winner===t1?'winner':'loser') : '';
@@ -961,7 +961,7 @@ function renderSidebar() {
     '</div>';
   }).join('');
 
-  document.getElementById('sg-list').innerHTML = html || '<div style="padding:16px;font-family:var(--fm);font-size:11px;color:var(--muted)">No games scheduled</div>';
+  document.getElementById('sg-list').innerHTML = html || '<div style="padding:16px;font-family:var(--fm);font-size:16px;color:var(--muted)">No games scheduled</div>';
 }
 
 // ============================================================
