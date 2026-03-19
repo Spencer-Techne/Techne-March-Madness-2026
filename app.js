@@ -363,10 +363,19 @@ function renderLeaderboard() {
   // === LEADERBOARD ROWS ===
   const RORDER = ['r1','r2','s16','e8','ff2','nc'];
   let rank = 0;
+  let prevScore = null;
+  let rowIndex = 0;
   const newRanks = {};
   const html = rows.map((p, i) => {
     const has = hasPicks(p);
-    if (has) rank++;
+    if (has) {
+      rowIndex++;
+      // Only increment rank if score is different from previous
+      if (prevScore === null || p.sc.total !== prevScore) {
+        rank = rowIndex;
+      }
+      prevScore = p.sc.total;
+    }
     const rankDisp = has ? rank : '—';
     const rankCls  = has ? (rank===1?'r1':rank===2?'r2':rank===3?'r3':'') : '';
     const aiCls    = p.type==='ai' ? 'ai' : '';
