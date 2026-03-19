@@ -1,0 +1,42 @@
+name: Update Tournament Scores
+
+on:
+  schedule:
+    # Run every hour from 12pm to midnight UTC (8am-8pm ET / extends to cover late games)
+    # NCAA games typically tip from 12pm-10pm ET, finish by ~midnight ET
+    - cron: '0 12-23 * 3 *'  # Every hour, noon-11pm UTC, every day in March
+    - cron: '0 0-4 * 3-4 *'  # Every hour, midnight-4am UTC (8pm-midnight ET), March-April
+    - cron: '0 0-4 * 4 *'    # April coverage for Final Four / Championship
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  update-scores:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch and update scores
+        run: node scripts/update-scores.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "Score Bot"
+          git config user.email "bot@technemedia.com"
+          git add data.json
+          if git diff --cached --quiet; then
+            echo "No score changes detected"
+          else
+            GAME_COUNT=$(git diff --cached data.json | grep -c '"results"' || echo "0")
+            git commit -m "🏀 Auto-update scores — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "Scores updated and pushed!"
+          fi
