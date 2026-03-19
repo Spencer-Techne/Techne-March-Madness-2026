@@ -315,11 +315,10 @@ function renderLeaderboard() {
     </div>`;
   } else { hvaEl.innerHTML = ''; }
 
-  // === BEST PICK / WORST MISS CALLOUTS ===
+  // === BEST PICK / WORST MISS CALLOUTS (right sidebar) ===
   const calloutsEl = document.getElementById('lb-callouts');
   const playedGames = Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]);
   if (playedGames.length > 0) {
-    // Best pick: highest point single correct pick, with who got it
     let bestPick = null;
     let bestPts = 0;
     let bestWho = [];
@@ -334,16 +333,14 @@ function renderLeaderboard() {
         if (p.picks[gid] === results[gid]) gotIt.push(p.name);
         else missedIt.push(p.name);
       });
-      // Best pick = fewest people got it right AND high points
       if (gotIt.length > 0 && gotIt.length <= 3 && pts >= bestPts) {
         bestPts = pts; bestPick = gid; bestWho = gotIt;
       }
-      // Worst miss = most people got it wrong
       if (missedIt.length > worstMissCount) {
         worstMissCount = missedIt.length; worstGame = gid;
       }
     }
-    let calloutsHtml = '<div class="lb-callouts">';
+    let calloutsHtml = '';
     if (bestPick && bestWho.length > 0 && bestWho.length < rows.filter(p=>hasPicks(p)).length) {
       calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called ${esc(results[bestPick])} in ${bestPick} (+${bestPts} pts)</div></div>`;
     }
@@ -351,9 +348,12 @@ function renderLeaderboard() {
       const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
       calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
     }
-    calloutsHtml += '</div>';
-    calloutsEl.innerHTML = (bestPick || worstGame) ? calloutsHtml : '';
-  } else { calloutsEl.innerHTML = ''; }
+    // Also add a quick "games scored" stat
+    calloutsHtml += `<div class="callout"><div class="callout-icon">📋</div><div class="callout-label">Games Scored</div><div class="callout-text">${playedGames.length} of 63</div><div class="callout-sub">R64 through Championship</div></div>`;
+    calloutsEl.innerHTML = calloutsHtml;
+  } else {
+    calloutsEl.innerHTML = '<div class="callout-empty">Insights will appear once Round of 64 results are logged</div>';
+  }
 
   // === LEADERBOARD ROWS ===
   const RORDER = ['r1','r2','s16','e8','ff2','nc'];
