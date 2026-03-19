@@ -142,8 +142,51 @@ main { max-width: 1440px; margin: 0 auto; padding: 28px 20px; display: flex; gap
   animation: fadeUp 0.35s ease both;
 }
 .lb-row:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-1px); }
-.lb-row.r1  { border-color: rgba(245,197,24,0.35); background: linear-gradient(135deg, rgba(245,197,24,0.04), var(--bg2)); }
-.lb-row.r1:hover { border-color: rgba(245,197,24,0.55); }
+.lb-row.r1  {
+  border-color: rgba(245,197,24,0.5);
+  background: linear-gradient(135deg, rgba(245,197,24,0.06), var(--bg2));
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.35s ease both, fireGlow 2s ease-in-out infinite;
+}
+.lb-row.r1::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,100,0,0.4) 15%,
+    rgba(255,200,0,0.6) 30%,
+    rgba(255,120,0,0.5) 45%,
+    rgba(255,60,0,0.3) 55%,
+    rgba(255,180,0,0.5) 70%,
+    rgba(255,80,0,0.4) 85%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: fireBorder 3s linear infinite;
+  z-index: -1;
+  filter: blur(4px);
+}
+.lb-row.r1::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 9px;
+  background: var(--bg2);
+  z-index: -1;
+}
+@keyframes fireBorder {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes fireGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,120,0,0.15), 0 0 30px rgba(255,80,0,0.08); }
+  50% { box-shadow: 0 0 25px rgba(255,140,0,0.25), 0 0 50px rgba(255,80,0,0.12); }
+}
+.lb-row.r1:hover { border-color: rgba(245,197,24,0.7); }
 .lb-row.r2  { border-color: rgba(192,192,192,0.2); }
 .lb-row.r3  { border-color: rgba(205,127,50,0.2); }
 .lb-row.ai  { border-color: rgba(0,212,255,0.12); }
