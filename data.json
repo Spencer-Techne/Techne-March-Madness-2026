@@ -841,11 +841,18 @@
       }
     }
   ],
-  "results": {
+ "results": {
     "FF1": "Texas",
     "FF2": "Howard",
-    "FF3": "Miami (OH)"
-  },
+    "FF3": "Miami (OH)",
+    "E2": "TCU",
+    "E5": "Louisville",
+    "W3": "High Point",
+    "FF4": "Prairie View",
+    "E1": "Duke",
+    "S3": "Vanderbilt",
+    "S4": "Nebraska"
+},
   "schedule": {
     "2026-03-19": {
       "label": "Thursday, March 19 — Round of 64",
