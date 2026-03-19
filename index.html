@@ -78,7 +78,7 @@ nav button:hover { color: var(--text); background: var(--bg3); }
 nav button.active { color: var(--orange); background: rgba(212,146,42,0.1); }
 
 /* MAIN */
-main { max-width: 1280px; margin: 0 auto; padding: 28px 20px; display: flex; gap: 24px; }
+main { max-width: 1440px; margin: 0 auto; padding: 28px 20px; display: flex; gap: 24px; }
 .main-content { flex: 1; min-width: 0; max-width: 1080px; }
 .view { display: none; }
 .view.active { display: block; }
@@ -396,13 +396,13 @@ select:focus { border-color: var(--orange); }
 .lb-champ-name.eliminated { color: var(--red); text-decoration: line-through; opacity: 0.6; }
 .lb-champ-name.alive { color: var(--text); }
 
-/* CALLOUTS */
-.lb-callouts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-.callout { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 200px; }
+/* CALLOUTS — inside right sidebar */
+.callout { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 6px 12px; }
 .callout-icon { font-size: 18px; margin-bottom: 4px; }
 .callout-label { font-family: var(--fm); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
 .callout-text { font-family: var(--fd); font-weight: 700; font-size: 17px; color: var(--text); }
 .callout-sub { font-family: var(--fm); font-size: 11px; color: var(--muted); margin-top: 2px; }
+.callout-empty { padding: 16px 14px; font-family: var(--fm); font-size: 12px; color: var(--muted); text-align: center; }
 
 /* BRACKET STILL-ALIVE INDICATOR */
 .slot-alive    { border-color: rgba(212,146,42,0.25); background: rgba(212,146,42,0.04); }
@@ -412,8 +412,11 @@ select:focus { border-color: var(--orange); }
 .slot-elim     .bkt-name { color: var(--muted); opacity: 0.5; text-decoration: line-through; text-decoration-color: rgba(239,68,68,0.3); }
 .slot-elim     .bkt-ico  { color: var(--red); opacity: 0.4; }
 
-/* ====== TODAY'S GAMES SIDEBAR ====== */
+/* ====== TODAY'S GAMES SIDEBAR (LEFT) ====== */
 .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
+
+/* ====== INSIGHTS SIDEBAR (RIGHT) ====== */
+.sidebar-right { width: 280px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 .sidebar-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -438,9 +441,13 @@ select:focus { border-color: var(--orange); }
 .sg-live { font-family: var(--fm); font-size: 14px; color: var(--red); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; animation: livePulse 1.5s ease-in-out infinite; }
 @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
+@media (max-width: 1200px) {
+  .sidebar-right { display: none; }
+}
 @media (max-width: 900px) {
   main { flex-direction: column; }
   .sidebar { width: 100%; position: static; max-height: none; order: -1; }
+  .sidebar-right { display: none; }
   .sg-list { display: grid; grid-template-columns: 1fr 1fr; }
   .sg-item { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.03); }
 }
@@ -490,7 +497,6 @@ select:focus { border-color: var(--orange); }
     <div class="section-meta" id="lb-meta">Loading...</div>
     <div id="hva-bar"></div>
     <div class="round-pills" id="round-pills"></div>
-    <div id="lb-callouts"></div>
     <div class="lb-list" id="lb-list">
       <div class="loading">Loading bracket data...</div>
     </div>
@@ -618,6 +624,17 @@ select:focus { border-color: var(--orange); }
   </div>
 
   </div> <!-- /.main-content -->
+
+  <!-- Right Sidebar: Insights -->
+  <aside class="sidebar-right" id="sidebar-right">
+    <div class="sidebar-card">
+      <div class="sidebar-head">
+        <span class="sidebar-head-icon">📊</span>
+        <span class="sidebar-head-title">Insights</span>
+      </div>
+      <div id="lb-callouts" style="padding:6px 0;"></div>
+    </div>
+  </aside>
 
 </main>
 
