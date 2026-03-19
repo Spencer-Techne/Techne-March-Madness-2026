@@ -415,6 +415,18 @@ select:focus { border-color: var(--orange); }
 /* ====== TODAY'S GAMES SIDEBAR (LEFT) ====== */
 .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
 
+/* SIDEBAR CHAMPION CARD */
+.sidebar-champ-card {
+  background: var(--bg2); border: 1px solid rgba(212,146,42,0.25);
+  border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 12px;
+}
+.sidebar-champ-lbl { font-family: var(--fm); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.sidebar-champ-team { font-family: var(--fd); font-weight: 900; font-size: 36px; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; color: var(--gold); margin-bottom: 10px; }
+.sidebar-champ-team.correct { color: var(--green); }
+.sidebar-champ-team.wrong { color: var(--red); text-decoration: line-through; }
+.sidebar-champ-logo { width: 80px; height: 80px; object-fit: contain; margin: 0 auto; display: block; }
+.sidebar-champ-actual { font-family: var(--fm); font-size: 13px; color: var(--muted); margin-top: 8px; }
+
 /* ====== INSIGHTS SIDEBAR (RIGHT) ====== */
 .sidebar-right { width: 280px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; max-height: calc(100vh - 40px); overflow-y: auto; }
 .sidebar::-webkit-scrollbar { width: 4px; }
@@ -472,8 +484,9 @@ select:focus { border-color: var(--orange); }
 
 <main>
 
-  <!-- Sidebar: Today's Games -->
+  <!-- Sidebar: Champion Pick + Today's Games -->
   <aside class="sidebar" id="sidebar">
+    <div id="sidebar-champ"></div>
     <div class="sidebar-card">
       <div class="sidebar-head">
         <span class="sidebar-head-icon">🏀</span>
