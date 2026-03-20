@@ -376,7 +376,33 @@ function renderLeaderboard() {
       const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
       calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
     }
-    calloutsHtml += `<div class="callout"><div class="callout-icon">📋</div><div class="callout-label">Games Scored</div><div class="callout-text">${playedGames.length} of 63</div><div class="callout-sub">R64 through Championship</div></div>`;
+    // "Still alive" — who has the most unique teams in their bracket that are still in the tournament
+    // A team is "eliminated" if they lost any game in the results
+    const eliminatedTeams = new Set();
+    for (const [gid, winner] of Object.entries(results)) {
+      const g = GAMES[gid];
+      if (!g) continue;
+      const [t1, t2] = getTeams(gid, null, results);
+      if (t1 && t1 !== winner) eliminatedTeams.add(t1);
+      if (t2 && t2 !== winner) eliminatedTeams.add(t2);
+    }
+
+    let bestAlive = null;
+    let bestAliveCount = 0;
+    const withPicks = rows.filter(p => hasPicks(p));
+    withPicks.forEach(p => {
+      // Get all unique teams this person picked anywhere in their bracket
+      const pickedTeams = new Set(Object.values(p.picks));
+      // Count how many of those teams are still alive (not eliminated)
+      let alive = 0;
+      pickedTeams.forEach(team => {
+        if (team && !eliminatedTeams.has(team)) alive++;
+      });
+      if (alive > bestAliveCount) { bestAliveCount = alive; bestAlive = p.name; }
+    });
+    if (bestAlive) {
+      calloutsHtml += `<div class="callout"><div class="callout-icon">🎯</div><div class="callout-label">Healthiest Bracket</div><div class="callout-text">${esc(bestAlive)}</div><div class="callout-sub">${bestAliveCount} teams still alive</div></div>`;
+    }
     calloutsEl.innerHTML = calloutsHtml;
   } else {
     calloutsEl.innerHTML = '<div class="callout-empty">Insights will appear once Round of 64 results are logged</div>';
