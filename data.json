@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-19"
+    "updated": "2026-03-20"
   },
   "participants": [
     {
@@ -857,7 +857,9 @@
     "S5": "VCU",
     "M1": "Michigan",
     "S7": "Texas A&M",
-    "W5": "Texas"
+    "W5": "Texas",
+    "W6": "Gonzaga",
+    "S6": "Illinois"
   },
   "schedule": {
     "2026-03-19": {
