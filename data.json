@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-20"
+    "updated": "2026-03-19"
   },
   "participants": [
     {
@@ -857,13 +857,7 @@
     "S5": "VCU",
     "M1": "Michigan",
     "S7": "Texas A&M",
-    "W5": "Texas",
-    "W6": "Gonzaga",
-    "S6": "Illinois",
-    "M7": "Kentucky",
-    "M3": "Texas Tech",
-    "S8": "Houston",
-    "M2": "Saint Louis"
+    "W5": "Texas"
   },
   "schedule": {
     "2026-03-19": {
@@ -920,7 +914,7 @@
           "tv": "CBS"
         },
         {
-          "id": "S7",
+          "id": "E4",
           "time": "7:15 PM",
           "tv": "truTV"
         },
@@ -930,22 +924,22 @@
           "tv": "TBS"
         },
         {
-          "id": "E4",
+          "id": "S7",
           "time": "9:20 PM",
           "tv": "truTV"
         },
         {
-          "id": "W1",
+          "id": "E8",
           "time": "9:40 PM",
           "tv": "CBS"
         },
         {
-          "id": "S1",
+          "id": "W8",
           "time": "9:50 PM",
           "tv": "TNT"
         },
         {
-          "id": "W8",
+          "id": "E3",
           "time": "9:55 PM",
           "tv": "TBS"
         }
@@ -955,18 +949,18 @@
       "label": "Friday, March 20 — Round of 64",
       "games": [
         {
-          "id": "E3",
+          "id": "M7",
           "time": "12:15 PM",
           "tv": "CBS"
         },
         {
-          "id": "M4",
+          "id": "S2",
           "time": "12:40 PM",
           "tv": "truTV"
         },
         {
-          "id": "M5",
-          "time": "1:30 PM",
+          "id": "W1",
+          "time": "1:35 PM",
           "tv": "TNT"
         },
         {
@@ -975,12 +969,12 @@
           "tv": "TBS"
         },
         {
-          "id": "M3",
+          "id": "M8",
           "time": "2:50 PM",
           "tv": "CBS"
         },
         {
-          "id": "S2",
+          "id": "M4",
           "time": "3:15 PM",
           "tv": "truTV"
         },
@@ -1015,22 +1009,22 @@
           "tv": "TBS"
         },
         {
-          "id": "M7",
+          "id": "M3",
           "time": "9:20 PM",
           "tv": "truTV"
         },
         {
-          "id": "M8",
-          "time": "9:40 PM",
-          "tv": "CBS"
-        },
-        {
-          "id": "E8",
-          "time": "9:50 PM",
+          "id": "M5",
+          "time": "9:25 PM",
           "tv": "TNT"
         },
         {
           "id": "W7",
+          "time": "9:40 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "S1",
           "time": "9:55 PM",
           "tv": "TBS"
         }
