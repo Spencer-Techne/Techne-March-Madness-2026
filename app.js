@@ -225,6 +225,49 @@ function isPickStillAlive(gid, pick, results) {
 
 function hasPicks(p) { return p.submitted && p.picks && Object.keys(p.picks).length > 0; }
 
+// Convert an ET time string like "12:15 PM" to the viewer's local timezone
+function convertETtoLocal(etTimeStr) {
+  try {
+    // Parse the ET time string
+    const match = etTimeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return etTimeStr;
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const ampm = match[3].toUpperCase();
+    if (ampm === 'PM' && hours !== 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+
+    // Create a date in ET (use today's date as base)
+    const today = new Date();
+    const etDateStr = today.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    const etDate = new Date(etDateStr + 'T' + String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':00');
+
+    // Get the ET offset for this date (handles EDT vs EST automatically)
+    const etFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' });
+    const localFormatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+    // Calculate the actual UTC time by parsing what ET thinks it is
+    const utcMs = etDate.getTime();
+    // Get ET's UTC offset in ms
+    const etOffsetParts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', timeZoneName: 'longOffset' }).formatToParts(today);
+    const offsetStr = etOffsetParts.find(p => p.type === 'timeZoneName')?.value || 'GMT-04:00';
+    const offsetMatch = offsetStr.match(/GMT([+-])(\d{2}):(\d{2})/);
+    let etOffsetMs = -4 * 3600000; // default EDT
+    if (offsetMatch) {
+      const sign = offsetMatch[1] === '+' ? 1 : -1;
+      etOffsetMs = sign * (parseInt(offsetMatch[2]) * 3600000 + parseInt(offsetMatch[3]) * 60000);
+    }
+
+    // The ET time as UTC
+    const utcTime = new Date(utcMs - etOffsetMs);
+
+    // Format in local timezone
+    return localFormatter.format(utcTime);
+  } catch(e) {
+    return etTimeStr; // fallback: show original ET time
+  }
+}
+
 function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -1247,7 +1290,7 @@ function renderSidebar() {
       const detail = (live1?.detail || live2?.detail || 'LIVE');
       metaHtml = '<span class="sg-live">' + esc(detail) + '</span>';
     } else {
-      metaHtml = '<span class="sg-time">' + sg.time + '</span><span class="sg-tv">' + sg.tv + '</span>';
+      metaHtml = '<span class="sg-time">' + convertETtoLocal(sg.time) + '</span><span class="sg-tv">' + sg.tv + '</span>';
     }
 
     const rowCls = winner ? 'sg-item sg-done' : isLive ? 'sg-item sg-in-progress' : 'sg-item';
