@@ -1,4 +1,3 @@
-
 // ============================================================
 // BRACKET STRUCTURE — hardcoded, doesn't change
 // ============================================================
@@ -324,36 +323,59 @@ function renderLeaderboard() {
   const calloutsEl = document.getElementById('lb-callouts');
   const playedGames = Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]);
   if (playedGames.length > 0) {
-    let bestPick = null;
-    let bestPts = 0;
+    // Best pick = correctly called the biggest upset (highest seed diff where lower seed won)
+    let bestUpsetGid = null;
+    let bestSeedDiff = 0;
     let bestWho = [];
     let worstGame = null;
     let worstMissCount = 0;
     for (const gid of playedGames) {
       const g = GAMES[gid];
-      const pts = RPTS[g.round] || 0;
-      let gotIt = [], missedIt = [];
+      const winner = results[gid];
+      // Calculate seed differential (only for R1 games with seeds)
+      if (g.tSeed && g.bSeed) {
+        const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
+        const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
+        // It's an upset if the higher seed number (worse seed) won
+        if (winnerSeed > loserSeed) {
+          const diff = winnerSeed - loserSeed;
+          if (diff > bestSeedDiff) {
+            // Find who called it
+            const gotIt = [];
+            rows.forEach(p => {
+              if (!hasPicks(p)) return;
+              if (p.picks[gid] === winner) gotIt.push(p.name);
+            });
+            if (gotIt.length > 0) {
+              bestSeedDiff = diff;
+              bestUpsetGid = gid;
+              bestWho = gotIt;
+            }
+          }
+        }
+      }
+      // Worst miss = most people got it wrong
+      let missedIt = 0;
       rows.forEach(p => {
         if (!hasPicks(p)) return;
-        if (p.picks[gid] === results[gid]) gotIt.push(p.name);
-        else missedIt.push(p.name);
+        if (p.picks[gid] !== results[gid]) missedIt++;
       });
-      if (gotIt.length > 0 && gotIt.length <= 3 && pts >= bestPts) {
-        bestPts = pts; bestPick = gid; bestWho = gotIt;
-      }
-      if (missedIt.length > worstMissCount) {
-        worstMissCount = missedIt.length; worstGame = gid;
+      if (missedIt > worstMissCount) {
+        worstMissCount = missedIt; worstGame = gid;
       }
     }
     let calloutsHtml = '';
-    if (bestPick && bestWho.length > 0 && bestWho.length < rows.filter(p=>hasPicks(p)).length) {
-      calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called ${esc(results[bestPick])} in ${bestPick} (+${bestPts} pts)</div></div>`;
+    if (bestUpsetGid && bestWho.length > 0) {
+      const g = GAMES[bestUpsetGid];
+      const winner = results[bestUpsetGid];
+      const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
+      const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
+      calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called #${winnerSeed} ${esc(winner)} over #${loserSeed} in ${bestUpsetGid}</div></div>`;
     }
     if (worstGame && worstMissCount > rows.filter(p=>hasPicks(p)).length / 2) {
       const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
       calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
     }
-    // Also add a quick "games scored" stat
     calloutsHtml += `<div class="callout"><div class="callout-icon">📋</div><div class="callout-label">Games Scored</div><div class="callout-text">${playedGames.length} of 63</div><div class="callout-sub">R64 through Championship</div></div>`;
     calloutsEl.innerHTML = calloutsHtml;
   } else {
