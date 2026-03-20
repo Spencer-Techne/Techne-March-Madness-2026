@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-20"
+    "updated": "2026-03-19"
   },
   "participants": [
     {
@@ -845,19 +845,19 @@
     "FF1": "Texas",
     "FF2": "Howard",
     "FF3": "Miami (OH)",
+    "FF4": "Prairie View",
     "E2": "TCU",
+    "S4": "Nebraska",
     "E5": "Louisville",
     "W3": "High Point",
-    "FF4": "Prairie View",
     "E1": "Duke",
     "S3": "Vanderbilt",
-    "S4": "Nebraska",
     "E6": "Michigan St.",
-    "M1": "Michigan",
+    "W4": "Arkansas",
     "S5": "VCU",
+    "M1": "Michigan",
     "S7": "Texas A&M",
-    "W5": "Texas",
-    "W4": "Arkansas"
+    "W5": "Texas"
   },
   "schedule": {
     "2026-03-19": {
@@ -914,7 +914,7 @@
           "tv": "CBS"
         },
         {
-          "id": "E4",
+          "id": "S7",
           "time": "7:15 PM",
           "tv": "truTV"
         },
@@ -924,12 +924,12 @@
           "tv": "TBS"
         },
         {
-          "id": "E8",
+          "id": "E4",
           "time": "9:20 PM",
           "tv": "truTV"
         },
         {
-          "id": "W7",
+          "id": "W1",
           "time": "9:40 PM",
           "tv": "CBS"
         },
@@ -939,7 +939,7 @@
           "tv": "TNT"
         },
         {
-          "id": "W1",
+          "id": "W8",
           "time": "9:55 PM",
           "tv": "TBS"
         }
@@ -984,7 +984,7 @@
           "tv": "TNT"
         },
         {
-          "id": "S7",
+          "id": "S8",
           "time": "4:25 PM",
           "tv": "TBS"
         },
@@ -1019,12 +1019,12 @@
           "tv": "CBS"
         },
         {
-          "id": "S8",
+          "id": "E8",
           "time": "9:50 PM",
           "tv": "TNT"
         },
         {
-          "id": "W8",
+          "id": "W7",
           "time": "9:55 PM",
           "tv": "TBS"
         }
