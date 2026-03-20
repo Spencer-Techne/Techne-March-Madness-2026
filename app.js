@@ -228,7 +228,6 @@ function hasPicks(p) { return p.submitted && p.picks && Object.keys(p.picks).len
 // Convert an ET time string like "12:15 PM" to the viewer's local timezone
 function convertETtoLocal(etTimeStr) {
   try {
-    // Parse the ET time string
     const match = etTimeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
     if (!match) return etTimeStr;
     let hours = parseInt(match[1]);
@@ -237,34 +236,16 @@ function convertETtoLocal(etTimeStr) {
     if (ampm === 'PM' && hours !== 12) hours += 12;
     if (ampm === 'AM' && hours === 12) hours = 0;
 
-    // Create a date in ET (use today's date as base)
-    const today = new Date();
-    const etDateStr = today.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-    const etDate = new Date(etDateStr + 'T' + String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':00');
+    // Build a date string that JavaScript will parse as ET
+    // Use a known date during EDT (March 20, 2026)
+    // EDT = UTC-4, so add 4 hours to get UTC
+    const utcHours = hours + 4;
+    const utcDate = new Date(Date.UTC(2026, 2, 20, utcHours, minutes, 0));
 
-    // Get the ET offset for this date (handles EDT vs EST automatically)
-    const etFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' });
-    const localFormatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-    // Calculate the actual UTC time by parsing what ET thinks it is
-    const utcMs = etDate.getTime();
-    // Get ET's UTC offset in ms
-    const etOffsetParts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', timeZoneName: 'longOffset' }).formatToParts(today);
-    const offsetStr = etOffsetParts.find(p => p.type === 'timeZoneName')?.value || 'GMT-04:00';
-    const offsetMatch = offsetStr.match(/GMT([+-])(\d{2}):(\d{2})/);
-    let etOffsetMs = -4 * 3600000; // default EDT
-    if (offsetMatch) {
-      const sign = offsetMatch[1] === '+' ? 1 : -1;
-      etOffsetMs = sign * (parseInt(offsetMatch[2]) * 3600000 + parseInt(offsetMatch[3]) * 60000);
-    }
-
-    // The ET time as UTC
-    const utcTime = new Date(utcMs - etOffsetMs);
-
-    // Format in local timezone
-    return localFormatter.format(utcTime);
+    // Format in viewer's local timezone
+    return utcDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   } catch(e) {
-    return etTimeStr; // fallback: show original ET time
+    return etTimeStr;
   }
 }
 
