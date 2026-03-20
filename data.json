@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-19"
+    "updated": "2026-03-20"
   },
   "participants": [
     {
@@ -922,18 +922,24 @@
     "FF2": "Howard",
     "FF3": "Miami (OH)",
     "FF4": "Prairie View",
-    "E2": "TCU",
-    "S4": "Nebraska",
-    "E5": "Louisville",
-    "W3": "High Point",
     "E1": "Duke",
-    "S3": "Vanderbilt",
+    "E2": "TCU",
+    "E5": "Louisville",
     "E6": "Michigan St.",
-    "W4": "Arkansas",
+    "S3": "Vanderbilt",
+    "S4": "Nebraska",
     "S5": "VCU",
-    "M1": "Michigan",
+    "S6": "Illinois",
     "S7": "Texas A&M",
-    "W5": "Texas"
+    "S8": "Houston",
+    "W3": "High Point",
+    "W4": "Arkansas",
+    "W5": "Texas",
+    "W6": "Gonzaga",
+    "M1": "Michigan",
+    "M2": "Saint Louis",
+    "M7": "Kentucky",
+    "M3": "Texas Tech"
   },
   "schedule": {
     "2026-03-19": {
@@ -990,7 +996,7 @@
           "tv": "CBS"
         },
         {
-          "id": "E4",
+          "id": "S6",
           "time": "7:15 PM",
           "tv": "truTV"
         },
@@ -1005,17 +1011,17 @@
           "tv": "truTV"
         },
         {
-          "id": "E8",
+          "id": "M2",
           "time": "9:40 PM",
           "tv": "CBS"
         },
         {
-          "id": "W8",
+          "id": "W6",
           "time": "9:50 PM",
           "tv": "TNT"
         },
         {
-          "id": "E3",
+          "id": "S8",
           "time": "9:55 PM",
           "tv": "TBS"
         }
@@ -1030,7 +1036,7 @@
           "tv": "CBS"
         },
         {
-          "id": "S2",
+          "id": "M3",
           "time": "12:40 PM",
           "tv": "truTV"
         },
@@ -1040,7 +1046,7 @@
           "tv": "TNT"
         },
         {
-          "id": "S6",
+          "id": "M6",
           "time": "1:50 PM",
           "tv": "TBS"
         },
@@ -1055,54 +1061,54 @@
           "tv": "truTV"
         },
         {
-          "id": "M6",
-          "time": "4:05 PM",
+          "id": "W2",
+          "time": "4:10 PM",
           "tv": "TNT"
         },
         {
-          "id": "S8",
+          "id": "M5",
           "time": "4:25 PM",
           "tv": "TBS"
         },
         {
-          "id": "E7",
+          "id": "S2",
           "time": "6:50 PM",
           "tv": "TNT"
         },
         {
-          "id": "M2",
+          "id": "E3",
           "time": "7:10 PM",
           "tv": "CBS"
         },
         {
-          "id": "W2",
-          "time": "7:15 PM",
-          "tv": "truTV"
-        },
-        {
-          "id": "W6",
+          "id": "E7",
           "time": "7:25 PM",
           "tv": "TBS"
         },
         {
-          "id": "M3",
-          "time": "9:20 PM",
+          "id": "W8",
+          "time": "7:35 PM",
           "tv": "truTV"
         },
         {
-          "id": "M5",
+          "id": "S1",
           "time": "9:25 PM",
           "tv": "TNT"
         },
         {
-          "id": "W7",
-          "time": "9:40 PM",
+          "id": "E4",
+          "time": "9:45 PM",
           "tv": "CBS"
         },
         {
-          "id": "S1",
-          "time": "9:55 PM",
+          "id": "E8",
+          "time": "10:00 PM",
           "tv": "TBS"
+        },
+        {
+          "id": "W7",
+          "time": "10:10 PM",
+          "tv": "truTV"
         }
       ]
     }
