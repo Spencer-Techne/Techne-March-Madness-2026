@@ -2,11 +2,12 @@ name: Update Tournament Scores
 
 on:
   schedule:
-    # Run every hour from 12pm to midnight UTC (8am-8pm ET / extends to cover late games)
+    # Run every 15 minutes during game windows
     # NCAA games typically tip from 12pm-10pm ET, finish by ~midnight ET
-    - cron: '0 12-23 * 3 *'  # Every hour, noon-11pm UTC, every day in March
-    - cron: '0 0-4 * 3-4 *'  # Every hour, midnight-4am UTC (8pm-midnight ET), March-April
-    - cron: '0 0-4 * 4 *'    # April coverage for Final Four / Championship
+    # UTC is ET+4 during EDT (March-April)
+    - cron: '*/15 12-23 * 3 *'  # Every 15 min, noon-11pm UTC (8am-7pm ET), March
+    - cron: '*/15 0-4 * 3-4 *'  # Every 15 min, midnight-4am UTC (8pm-midnight ET), March-April
+    - cron: '*/15 0-4 * 4 *'    # April coverage for Final Four / Championship
   workflow_dispatch: # Allow manual trigger from GitHub UI
 
 permissions:
@@ -35,7 +36,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No score changes detected"
           else
-            GAME_COUNT=$(git diff --cached data.json | grep -c '"results"' || echo "0")
             git commit -m "🏀 Auto-update scores — $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
             echo "Scores updated and pushed!"
