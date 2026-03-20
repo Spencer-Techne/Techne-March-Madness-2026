@@ -1103,6 +1103,79 @@ const LOGO_MAP = {
   'Houston':'248','Idaho':'70','NC State':'152','UMBC':'2378'
 };
 
+// ============================================================
+// LIVE SCORES (via Cloudflare Worker proxy)
+// Set this to your Cloudflare Worker URL after deploying cloudflare-worker.js
+// Leave empty to disable live scores
+// ============================================================
+const LIVE_SCORES_URL = ''; // e.g. 'https://espn-scores.your-subdomain.workers.dev'
+
+let liveScores = {}; // { 'TeamName': { score: '45', status: 'live'|'final'|'pre', clock: '12:34', period: 1 } }
+
+async function fetchLiveScores() {
+  if (!LIVE_SCORES_URL) return;
+  try {
+    const res = await fetch(LIVE_SCORES_URL + '?_=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    const newScores = {};
+    (data.games || []).forEach(game => {
+      const isLive = game.status === 'STATUS_IN_PROGRESS';
+      const isFinal = game.status === 'STATUS_FINAL';
+      const isHalf = game.status === 'STATUS_HALFTIME';
+      if (!isLive && !isFinal && !isHalf) return;
+      game.teams.forEach(t => {
+        // Normalize team name using our mapping
+        const localName = normalizeESPNName(t.name);
+        if (localName) {
+          newScores[localName] = {
+            score: t.score,
+            status: isFinal ? 'final' : 'live',
+            clock: game.clock,
+            period: game.period,
+            detail: game.statusDetail
+          };
+        }
+      });
+    });
+    liveScores = newScores;
+    renderSidebar(); // re-render sidebar with live scores
+  } catch(e) {
+    // Silent fail
+  }
+}
+
+// Simple ESPN name normalizer for live scores (subset of the full mapping in update-scores.js)
+function normalizeESPNName(name) {
+  const map = {
+    'Duke Blue Devils':'Duke','Ohio State Buckeyes':'Ohio St.','TCU Horned Frogs':'TCU',
+    "St. John's Red Storm":"St. John's",'Kansas Jayhawks':'Kansas','California Baptist Lancers':'Cal Baptist',
+    'Louisville Cardinals':'Louisville','South Florida Bulls':'South Florida','Michigan State Spartans':'Michigan St.',
+    'North Dakota State Bison':'N. Dakota St.','UCLA Bruins':'UCLA','UCF Knights':'UCF',
+    'UConn Huskies':'UConn','Connecticut Huskies':'UConn','Furman Paladins':'Furman',
+    'Arizona Wildcats':'Arizona','LIU Sharks':'LIU','Long Island University Sharks':'LIU',
+    'Villanova Wildcats':'Villanova','Utah State Aggies':'Utah St.','Wisconsin Badgers':'Wisconsin',
+    'High Point Panthers':'High Point','Arkansas Razorbacks':'Arkansas','BYU Cougars':'BYU',
+    'Gonzaga Bulldogs':'Gonzaga','Kennesaw State Owls':'Kennesaw St.','Miami Hurricanes':'Miami (FL)',
+    'Missouri Tigers':'Missouri','Purdue Boilermakers':'Purdue','Queens Royals':'Queens',
+    'Michigan Wolverines':'Michigan','Georgia Bulldogs':'Georgia','Saint Louis Billikens':'Saint Louis',
+    'Texas Tech Red Raiders':'Texas Tech','Akron Zips':'Akron','Alabama Crimson Tide':'Alabama',
+    'Hofstra Pride':'Hofstra','Tennessee Volunteers':'Tennessee','Virginia Cavaliers':'Virginia',
+    'Wright State Raiders':'Wright St.','Kentucky Wildcats':'Kentucky','Santa Clara Broncos':'Santa Clara',
+    'Iowa State Cyclones':'Iowa St.','Tennessee State Tigers':'Tennessee St.',
+    'Florida Gators':'Florida','Clemson Tigers':'Clemson','Iowa Hawkeyes':'Iowa',
+    'Vanderbilt Commodores':'Vanderbilt','McNeese Cowboys':'McNeese','Nebraska Cornhuskers':'Nebraska',
+    'Troy Trojans':'Troy','North Carolina Tar Heels':'N. Carolina','VCU Rams':'VCU',
+    'Illinois Fighting Illini':'Illinois','Penn Quakers':'Penn',"Saint Mary's Gaels":"Saint Mary's",
+    'Texas A&M Aggies':'Texas A&M','Houston Cougars':'Houston','Idaho Vandals':'Idaho',
+    'Texas Longhorns':'Texas','Howard Bison':'Howard','Miami (OH) RedHawks':'Miami (OH)',
+    'Prairie View A&M Panthers':'Prairie View','NC State Wolfpack':'NC State',
+    'Northern Iowa Panthers':'UNI','Siena Saints':'Siena',
+    "Hawai'i Rainbow Warriors":'Hawaii','Hawaii Rainbow Warriors':'Hawaii'
+  };
+  return map[name] || null;
+}
+
 function teamLogo(name) {
   const id = LOGO_MAP[name];
   if (!id) return '';
@@ -1155,14 +1228,29 @@ function renderSidebar() {
     const logo1 = teamLogo(t1);
     const logo2 = teamLogo(t2);
 
+    // Check for live scores from ESPN proxy
+    const live1 = liveScores[t1];
+    const live2 = liveScores[t2];
+    const isLive = !winner && ((live1 && live1.status === 'live') || (live2 && live2.status === 'live'));
+
     const cls1 = winner ? (winner === t1 ? 'winner' : 'loser') : '';
     const cls2 = winner ? (winner === t2 ? 'winner' : 'loser') : '';
 
-    const metaHtml = winner
-      ? '<span class="sg-final">✓ Final</span>'
-      : '<span class="sg-time">' + sg.time + '</span><span class="sg-tv">' + sg.tv + '</span>';
+    // Live score numbers next to team names
+    const score1 = isLive && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
+    const score2 = isLive && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
 
-    const rowCls = winner ? 'sg-item sg-done' : 'sg-item';
+    let metaHtml;
+    if (winner) {
+      metaHtml = '<span class="sg-final">✓ Final</span>';
+    } else if (isLive) {
+      const detail = (live1?.detail || live2?.detail || 'LIVE');
+      metaHtml = '<span class="sg-live">' + esc(detail) + '</span>';
+    } else {
+      metaHtml = '<span class="sg-time">' + sg.time + '</span><span class="sg-tv">' + sg.tv + '</span>';
+    }
+
+    const rowCls = winner ? 'sg-item sg-done' : isLive ? 'sg-item sg-in-progress' : 'sg-item';
 
     return '<div class="' + rowCls + '">' +
       '<div class="sg-teams">' +
@@ -1170,11 +1258,13 @@ function renderSidebar() {
           (logo1 ? '<img class="sg-logo" src="' + logo1 + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
           (s1 ? '<span class="sg-seed">' + s1 + '</span>' : '') +
           '<span>' + esc(t1) + '</span>' +
+          score1 +
         '</div>' +
         '<div class="sg-team ' + cls2 + '">' +
           (logo2 ? '<img class="sg-logo" src="' + logo2 + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
           (s2 ? '<span class="sg-seed">' + s2 + '</span>' : '') +
           '<span>' + esc(t2) + '</span>' +
+          score2 +
         '</div>' +
       '</div>' +
       '<div class="sg-meta">' + metaHtml + '</div>' +
@@ -1189,7 +1279,7 @@ function renderSidebar() {
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
   loadData();
-  // Auto-refresh every 60 seconds
+  // Auto-refresh data.json every 60 seconds
   setInterval(() => {
     fetch('data.json?_=' + Date.now())
       .then(r => r.ok ? r.json() : null)
@@ -1200,6 +1290,11 @@ window.addEventListener('DOMContentLoaded', () => {
         renderLeaderboard();
         renderSidebar();
       })
-      .catch(() => {}); // silent fail on auto-refresh
+      .catch(() => {});
   }, 60000);
+  // Poll live scores every 30 seconds (if Cloudflare Worker is configured)
+  if (LIVE_SCORES_URL) {
+    fetchLiveScores();
+    setInterval(fetchLiveScores, 30000);
+  }
 });
