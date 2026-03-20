@@ -393,7 +393,7 @@ async function main() {
 
   if (newResults > 0) {
     data.results = results;
-    data.meta.updated = new Date().toISOString().slice(0, 10);
+    data.meta.updated = new Date().toISOString();
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
     console.log(`\n${newResults} new result(s) logged:`);
     loggedGames.forEach(l => console.log(l));
