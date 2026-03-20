@@ -259,7 +259,18 @@ function renderPills() {
   document.getElementById('round-pills').innerHTML = html;
 
   const played = Object.keys(results).length;
-  document.getElementById('lb-meta').textContent = `${played} game${played===1?'':'s'} complete · Last updated ${appData?.meta?.updated || '—'}`;
+  let updatedText = appData?.meta?.updated || '—';
+  // If updated contains a T, it's a full ISO timestamp — show relative time
+  if (updatedText.includes('T')) {
+    const updatedDate = new Date(updatedText);
+    const diffMs = Date.now() - updatedDate.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) updatedText = 'just now';
+    else if (diffMin < 60) updatedText = `${diffMin}m ago`;
+    else if (diffMin < 1440) updatedText = `${Math.floor(diffMin/60)}h ago`;
+    else updatedText = `${Math.floor(diffMin/1440)}d ago`;
+  }
+  document.getElementById('lb-meta').textContent = `${played} game${played===1?'':'s'} complete · Updated ${updatedText}`;
 }
 
 // ============================================================
@@ -1017,7 +1028,7 @@ async function pushResults() {
   const nameUpdated = pendingResults['__names_updated'];
   delete pendingResults['__names_updated'];
   const newResults = { ...(appData.results || {}), ...pendingResults };
-  const newData    = { ...appData, results: newResults, meta: { ...appData.meta, updated: new Date().toISOString().slice(0,10) } };
+  const newData    = { ...appData, results: newResults, meta: { ...appData.meta, updated: new Date().toISOString() } };
 
   const apiBase = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json`;
   const headers = {
