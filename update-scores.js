@@ -101,6 +101,7 @@ const ESPN_TO_LOCAL = {
   'Purdue Boilermakers': 'Purdue',
   'Purdue': 'Purdue',
   'Queens Royals': 'Queens',
+  'Queens University Royals': 'Queens',
   'Queens (NC)': 'Queens',
   'Queens': 'Queens',
 
