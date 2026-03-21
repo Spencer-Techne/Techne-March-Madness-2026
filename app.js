@@ -1256,18 +1256,27 @@ function renderSidebar() {
     // Check for live scores from ESPN proxy
     const live1 = liveScores[t1];
     const live2 = liveScores[t2];
-    const isLive = !winner && ((live1 && live1.status === 'live') || (live2 && live2.status === 'live'));
-    const hasLiveScores = live1 && live2;
+    const isLive = (live1 && live1.status === 'live') || (live2 && live2.status === 'live');
+    const isESPNFinal = !winner && ((live1 && live1.status === 'final') || (live2 && live2.status === 'final'));
+    const isFinal = winner || isESPNFinal;
 
-    const cls1 = winner ? (winner === t1 ? 'winner' : 'loser') : '';
-    const cls2 = winner ? (winner === t2 ? 'winner' : 'loser') : '';
+    // Determine winner from ESPN data if data.json hasn't caught up
+    let espnWinner = null;
+    if (isESPNFinal && live1 && live2) {
+      espnWinner = parseInt(live1.score) > parseInt(live2.score) ? t1 : t2;
+    }
+    const effectiveWinner = winner || espnWinner;
 
-    // Show scores for live games AND final games (from ESPN data)
-    const score1 = (isLive || winner) && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
-    const score2 = (isLive || winner) && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
+    const cls1 = effectiveWinner ? (effectiveWinner === t1 ? 'winner' : 'loser') : '';
+    const cls2 = effectiveWinner ? (effectiveWinner === t2 ? 'winner' : 'loser') : '';
+
+    // Show scores for live, ESPN-final, and data.json-final games
+    const showScores = isLive || isFinal;
+    const score1 = showScores && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
+    const score2 = showScores && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
 
     let metaHtml;
-    if (winner) {
+    if (isFinal) {
       const detail = live1?.detail || live2?.detail || '';
       const finalLabel = detail.includes('OT') ? '✓ ' + esc(detail) : '✓ Final';
       metaHtml = '<span class="sg-final">' + finalLabel + '</span>';
@@ -1278,7 +1287,7 @@ function renderSidebar() {
       metaHtml = '<span class="sg-time">' + convertETtoLocal(sg.time) + '</span><span class="sg-tv">' + sg.tv + '</span>';
     }
 
-    const rowCls = winner ? 'sg-item sg-done' : isLive ? 'sg-item sg-in-progress' : 'sg-item';
+    const rowCls = isFinal ? 'sg-item sg-done' : isLive ? 'sg-item sg-in-progress' : 'sg-item';
 
     return '<div class="' + rowCls + '">' +
       '<div class="sg-teams">' +
