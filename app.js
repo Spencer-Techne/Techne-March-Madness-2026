@@ -1132,7 +1132,7 @@ const LOGO_MAP = {
 // Set this to your Cloudflare Worker URL after deploying cloudflare-worker.js
 // Leave empty to disable live scores
 // ============================================================
-const LIVE_SCORES_URL = ''; // e.g. 'https://espn-scores.your-subdomain.workers.dev'
+const LIVE_SCORES_URL = 'https://espn-scores.spencer-018.workers.dev';
 
 let liveScores = {}; // { 'TeamName': { score: '45', status: 'live'|'final'|'pre', clock: '12:34', period: 1 } }
 
@@ -1182,6 +1182,7 @@ function normalizeESPNName(name) {
     'High Point Panthers':'High Point','Arkansas Razorbacks':'Arkansas','BYU Cougars':'BYU',
     'Gonzaga Bulldogs':'Gonzaga','Kennesaw State Owls':'Kennesaw St.','Miami Hurricanes':'Miami (FL)',
     'Missouri Tigers':'Missouri','Purdue Boilermakers':'Purdue','Queens Royals':'Queens',
+    'Queens University Royals':'Queens',
     'Michigan Wolverines':'Michigan','Georgia Bulldogs':'Georgia','Saint Louis Billikens':'Saint Louis',
     'Texas Tech Red Raiders':'Texas Tech','Akron Zips':'Akron','Alabama Crimson Tide':'Alabama',
     'Hofstra Pride':'Hofstra','Tennessee Volunteers':'Tennessee','Virginia Cavaliers':'Virginia',
@@ -1256,17 +1257,20 @@ function renderSidebar() {
     const live1 = liveScores[t1];
     const live2 = liveScores[t2];
     const isLive = !winner && ((live1 && live1.status === 'live') || (live2 && live2.status === 'live'));
+    const hasLiveScores = live1 && live2;
 
     const cls1 = winner ? (winner === t1 ? 'winner' : 'loser') : '';
     const cls2 = winner ? (winner === t2 ? 'winner' : 'loser') : '';
 
-    // Live score numbers next to team names
-    const score1 = isLive && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
-    const score2 = isLive && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
+    // Show scores for live games AND final games (from ESPN data)
+    const score1 = (isLive || winner) && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
+    const score2 = (isLive || winner) && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
 
     let metaHtml;
     if (winner) {
-      metaHtml = '<span class="sg-final">✓ Final</span>';
+      const detail = live1?.detail || live2?.detail || '';
+      const finalLabel = detail.includes('OT') ? '✓ ' + esc(detail) : '✓ Final';
+      metaHtml = '<span class="sg-final">' + finalLabel + '</span>';
     } else if (isLive) {
       const detail = (live1?.detail || live2?.detail || 'LIVE');
       metaHtml = '<span class="sg-live">' + esc(detail) + '</span>';
