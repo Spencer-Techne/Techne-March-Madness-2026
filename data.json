@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-22T14:53:07.207Z"
+    "updated": "2026-03-22T14:56:13.292Z"
   },
   "participants": [
     {
@@ -944,15 +944,24 @@
     "M8": "Iowa St.",
     "M6": "Virginia",
     "W1": "Arizona",
-    "W2": "Utah St.",
-    "M5": "Tennessee",
-    "E7": "UCLA",
-    "W8": "Purdue",
-    "S2": "Iowa",
+    "E3": "St. John's",
     "E4": "Kansas",
+    "E7": "UCLA",
     "E8": "UConn",
+    "W2": "Utah St.",
+    "W7": "Miami (FL)",
+    "W8": "Purdue",
     "S1": "Florida",
-    "W7": "Miami (FL)"
+    "S2": "Iowa",
+    "M5": "Tennessee",
+    "E9": "Duke",
+    "E11": "Michigan St.",
+    "S10": "Nebraska",
+    "S11": "Illinois",
+    "S12": "Houston",
+    "W10": "Arkansas",
+    "W11": "Texas",
+    "M9": "Michigan"
   },
   "schedule": {
     "2026-03-19": {
@@ -1122,6 +1131,96 @@
           "id": "W7",
           "time": "10:10 PM",
           "tv": "truTV"
+        }
+      ]
+    },
+    "2026-03-21": {
+      "label": "Saturday, March 21 — Round of 32",
+      "games": [
+        {
+          "id": "M9",
+          "time": "12:10 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "W10",
+          "time": "2:40 PM",
+          "tv": "TNT"
+        },
+        {
+          "id": "E11",
+          "time": "2:45 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "E9",
+          "time": "5:15 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "S11",
+          "time": "5:15 PM",
+          "tv": "truTV"
+        },
+        {
+          "id": "W11",
+          "time": "7:10 PM",
+          "tv": "TNT"
+        },
+        {
+          "id": "S12",
+          "time": "7:45 PM",
+          "tv": "TBS"
+        },
+        {
+          "id": "S10",
+          "time": "8:45 PM",
+          "tv": "TNT"
+        }
+      ]
+    },
+    "2026-03-22": {
+      "label": "Sunday, March 22 — Round of 32",
+      "games": [
+        {
+          "id": "M10",
+          "time": "12:10 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "W9",
+          "time": "12:15 PM",
+          "tv": "TNT"
+        },
+        {
+          "id": "M11",
+          "time": "2:40 PM",
+          "tv": "TBS"
+        },
+        {
+          "id": "W12",
+          "time": "2:45 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "E10",
+          "time": "5:15 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "S9",
+          "time": "5:15 PM",
+          "tv": "truTV"
+        },
+        {
+          "id": "M12",
+          "time": "7:10 PM",
+          "tv": "TNT"
+        },
+        {
+          "id": "E12",
+          "time": "8:45 PM",
+          "tv": "TNT"
         }
       ]
     }
