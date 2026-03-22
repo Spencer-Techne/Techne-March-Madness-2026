@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-22T14:56:13.292Z"
+    "updated": "2026-03-22T20:19:12.875Z"
   },
   "participants": [
     {
@@ -1183,22 +1183,12 @@
       "label": "Sunday, March 22 — Round of 32",
       "games": [
         {
-          "id": "M10",
+          "id": "W12",
           "time": "12:10 PM",
           "tv": "CBS"
         },
         {
-          "id": "W9",
-          "time": "12:15 PM",
-          "tv": "TNT"
-        },
-        {
-          "id": "M11",
-          "time": "2:40 PM",
-          "tv": "TBS"
-        },
-        {
-          "id": "W12",
+          "id": "M12",
           "time": "2:45 PM",
           "tv": "CBS"
         },
@@ -1208,19 +1198,29 @@
           "tv": "CBS"
         },
         {
-          "id": "S9",
-          "time": "5:15 PM",
+          "id": "M11",
+          "time": "6:45 PM",
           "tv": "truTV"
         },
         {
-          "id": "M12",
+          "id": "W9",
           "time": "7:10 PM",
           "tv": "TNT"
+        },
+        {
+          "id": "S9",
+          "time": "7:45 PM",
+          "tv": "TBS"
         },
         {
           "id": "E12",
           "time": "8:45 PM",
           "tv": "TNT"
+        },
+        {
+          "id": "M10",
+          "time": "9:45 PM",
+          "tv": "TBS"
         }
       ]
     }
