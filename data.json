@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-22T20:19:12.875Z"
+    "updated": "2026-03-23T15:05:16.423Z"
   },
   "participants": [
     {
@@ -961,7 +961,14 @@
     "S12": "Houston",
     "W10": "Arkansas",
     "W11": "Texas",
-    "M9": "Michigan"
+    "M9": "Michigan",
+    "E12": "UConn",
+    "W9": "Arizona",
+    "W12": "Purdue",
+    "M10": "Alabama",
+    "M11": "Tennessee",
+    "M12": "Iowa St.",
+    "S9": "Iowa"
   },
   "schedule": {
     "2026-03-19": {
