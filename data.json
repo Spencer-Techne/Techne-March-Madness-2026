@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Techne × AI | 2026 March Madness Bracket Challenge",
-    "updated": "2026-03-23T15:05:16.423Z"
+    "updated": "2026-03-26T23:14:26.607Z"
   },
   "participants": [
     {
@@ -948,7 +948,6 @@
     "E4": "Kansas",
     "E7": "UCLA",
     "E8": "UConn",
-    "E10": "St. John's",
     "W2": "Utah St.",
     "W7": "Miami (FL)",
     "W8": "Purdue",
@@ -969,7 +968,8 @@
     "M10": "Alabama",
     "M11": "Tennessee",
     "M12": "Iowa St.",
-    "S9": "Iowa"
+    "S9": "Iowa",
+    "E10": "St. John's"
   },
   "schedule": {
     "2026-03-19": {
@@ -1228,6 +1228,56 @@
         {
           "id": "M10",
           "time": "9:45 PM",
+          "tv": "TBS"
+        }
+      ]
+    },
+    "2026-03-26": {
+      "label": "Thursday, March 26 — Sweet 16",
+      "games": [
+        {
+          "id": "W14",
+          "time": "7:10 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "S14",
+          "time": "7:30 PM",
+          "tv": "TBS"
+        },
+        {
+          "id": "W13",
+          "time": "9:45 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "S13",
+          "time": "10:05 PM",
+          "tv": "TBS"
+        }
+      ]
+    },
+    "2026-03-27": {
+      "label": "Friday, March 27 — Sweet 16",
+      "games": [
+        {
+          "id": "E13",
+          "time": "7:09 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "M13",
+          "time": "7:39 PM",
+          "tv": "TBS"
+        },
+        {
+          "id": "E14",
+          "time": "9:39 PM",
+          "tv": "CBS"
+        },
+        {
+          "id": "M14",
+          "time": "9:59 PM",
           "tv": "TBS"
         }
       ]
