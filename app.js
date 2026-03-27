@@ -276,8 +276,52 @@ function renderPills() {
   const results = appData?.results || {};
   const done = new Set(Object.keys(results).map(id => GAMES[id]?.round).filter(Boolean));
   const rounds = ['ff','r1','r2','s16','e8','ff2','nc'];
+
+  // Find the current round: the latest round with results, OR the next round
+  // if the previous round is fully complete
+  const allGamesByRound = {};
+  for (const [gid, g] of Object.entries(GAMES)) {
+    if (g.round && RPTS[g.round]) {
+      if (!allGamesByRound[g.round]) allGamesByRound[g.round] = [];
+      allGamesByRound[g.round].push(gid);
+    }
+  }
+
+  // Determine which rounds are fully complete
+  const fullyComplete = new Set();
+  for (const r of rounds) {
+    const games = allGamesByRound[r] || [];
+    if (games.length > 0 && games.every(gid => results[gid])) {
+      fullyComplete.add(r);
+    }
+  }
+
+  // Current round = first round that has results but isn't fully complete,
+  // OR if last completed round is done, the next round is current
+  let currentRound = null;
+  for (let i = 0; i < rounds.length; i++) {
+    const r = rounds[i];
+    if (done.has(r) && !fullyComplete.has(r)) {
+      currentRound = r;
+      break;
+    }
+    if (fullyComplete.has(r) && i < rounds.length - 1 && !done.has(rounds[i + 1])) {
+      currentRound = rounds[i + 1];
+      break;
+    }
+  }
+  // Fallback: if all completed rounds are fully done, current = next one
+  if (!currentRound) {
+    for (let i = 0; i < rounds.length; i++) {
+      if (!fullyComplete.has(rounds[i])) { currentRound = rounds[i]; break; }
+    }
+  }
+
   const html = rounds.map(r => {
-    const cls = done.has(r) ? 'rpill-done' : 'rpill-soon';
+    let cls;
+    if (r === currentRound) cls = 'rpill-live';
+    else if (fullyComplete.has(r)) cls = 'rpill-past';
+    else cls = 'rpill-soon';
     return `<div class="rpill ${cls}">${RLABELS[r]}</div>`;
   }).join('');
   document.getElementById('round-pills').innerHTML = html;
@@ -949,11 +993,11 @@ function renderAdminRounds() {
       return `
         <div class="admin-game">
           <div class="admin-game-id">${gid}${pendBadge}</div>
-          <button class="team-btn ${btn1cls}" onclick="setResult('${gid}','${esc(t1)}')" ${tbd?'disabled':''}>
+          <button class="team-btn ${btn1cls}" data-gid="${gid}" data-team="${esc(t1)}" onclick="setResult(this.dataset.gid, this.dataset.team)" ${tbd?'disabled':''}>
             ${s1?`<span class="tseed">#${s1}</span>`:''}${esc(t1)}
           </button>
           <span class="admin-vs">vs</span>
-          <button class="team-btn ${btn2cls}" onclick="setResult('${gid}','${esc(t2)}')" ${tbd?'disabled':''}>
+          <button class="team-btn ${btn2cls}" data-gid="${gid}" data-team="${esc(t2)}" onclick="setResult(this.dataset.gid, this.dataset.team)" ${tbd?'disabled':''}>
             ${s2?`<span class="tseed">#${s2}</span>`:''}${esc(t2)}
           </button>
           ${clearBtn}
