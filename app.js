@@ -1356,6 +1356,43 @@ function renderSidebar() {
 }
 
 // ============================================================
+// NEWS FEED
+// ============================================================
+async function fetchNews() {
+  if (!LIVE_SCORES_URL) return;
+  const feedEl = document.getElementById('news-feed');
+  if (!feedEl) return;
+  try {
+    const res = await fetch(LIVE_SCORES_URL + '/news?_=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.articles || data.articles.length === 0) {
+      feedEl.innerHTML = '<div class="news-loading">No news available</div>';
+      return;
+    }
+    feedEl.innerHTML = data.articles.slice(0, 8).map(a => {
+      const timeAgo = a.published ? getTimeAgo(a.published) : '';
+      const thumb = a.image ? `<img class="news-thumb" src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+      const href = a.link ? ` href="${esc(a.link)}" target="_blank" rel="noopener"` : '';
+      return `<a class="news-item"${href}>${thumb}<div class="news-text"><div class="news-headline">${esc(a.headline)}</div>${timeAgo ? `<div class="news-time">${timeAgo}</div>` : ''}</div></a>`;
+    }).join('');
+  } catch(e) {
+    // Silent fail
+  }
+}
+
+function getTimeAgo(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    const diffMin = Math.floor((Date.now() - d.getTime()) / 60000);
+    if (diffMin < 1) return 'just now';
+    if (diffMin < 60) return diffMin + 'm ago';
+    if (diffMin < 1440) return Math.floor(diffMin / 60) + 'h ago';
+    return Math.floor(diffMin / 1440) + 'd ago';
+  } catch(e) { return ''; }
+}
+
+// ============================================================
 // BOOT + AUTO-REFRESH
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
@@ -1377,5 +1414,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (LIVE_SCORES_URL) {
     fetchLiveScores();
     setInterval(fetchLiveScores, 30000);
+    fetchNews();
+    setInterval(fetchNews, 300000); // refresh news every 5 minutes
   }
 });
