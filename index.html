@@ -527,6 +527,12 @@ select:focus { border-color: var(--orange); }
   .sidebar-right { display: none; }
   .sg-list { display: grid; grid-template-columns: 1fr 1fr; }
   .sg-item { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.03); }
+  header { position: relative; height: auto; padding: 12px 16px; gap: 10px; flex-wrap: wrap; }
+  .h-logo { height: 44px; }
+  .h-title { font-size: 20px; line-height: 1.15; }
+  .h-sep { display: none; }
+  nav { width: 100%; gap: 0; justify-content: center; }
+  nav button { font-size: 13px; padding: 6px 8px; }
 }
 @media (max-width: 540px) {
   .sg-list { grid-template-columns: 1fr; }
