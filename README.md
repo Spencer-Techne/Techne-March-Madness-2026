@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/26124478/README.md)
 # Techne × AI — 2026 March Madness Bracket Challenge
 
 A live bracket challenge web app that pits **7 Techne Media team members** against **5 AI models** (Claude Sonnet, Claude Haiku, ChatGPT, Gemini, Gemini FAST) across the full 2026 NCAA Men's Basketball Tournament.
@@ -9,18 +8,22 @@ A live bracket challenge web app that pits **7 Techne Media team members** again
 
 ## How It Works
 
+- `bracket-config.js` holds the shared bracket graph, round metadata, logo map, and ESPN name mapping
 - `app.js` fetches `data.json` on page load
 - All bracket logic, scoring, and rendering happens client-side — no backend, no build step
 - To update scores: edit `data.json` → push to GitHub → page reflects changes immediately
 - The **Admin panel** (PIN: `2026`) can push `data.json` updates directly to GitHub via the API
+- The GitHub Actions workflow in `.github/workflows/update-scores.yml` can update `data.json` automatically
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `index.html` | All HTML + CSS |
-| `app.js` | All JavaScript (~970 lines) |
+| `bracket-config.js` | Shared tournament structure and mappings used by both the site and the updater |
+| `app.js` | Main browser logic for rendering, scoring, admin tools, and live refresh |
 | `data.json` | All bracket picks + results + schedule — the only file that changes during the tournament |
+| `update-scores.js` | Node script that fetches ESPN tournament results and updates `data.json` |
 | `techne-logo.png` | Basketball-textured Techne hexagon logo |
 
 ## Features
@@ -63,8 +66,8 @@ A live bracket challenge web app that pits **7 Techne Media team members** again
 | Riley | Florida |
 | Jeremy | Clemson |
 | Zach | Arizona |
-| Slot 6 | *(pending)* |
-| Slot 7 | *(pending)* |
+| RJ | Duke |
+| Ben | Arizona |
 
 ## Local Development
 

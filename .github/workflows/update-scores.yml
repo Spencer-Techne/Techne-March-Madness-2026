@@ -2,13 +2,13 @@ name: Update Tournament Scores
 
 on:
   schedule:
-    # Run every 15 minutes during game windows
-    # NCAA games typically tip from 12pm-10pm ET, finish by ~midnight ET
-    # UTC is ET+4 during EDT (March-April)
-    - cron: '*/15 12-23 * 3 *'  # Every 15 min, noon-11pm UTC (8am-7pm ET), March
-    - cron: '*/15 0-4 * 3-4 *'  # Every 15 min, midnight-4am UTC (8pm-midnight ET), March-April
-    - cron: '*/15 0-4 * 4 *'    # April coverage for Final Four / Championship
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+    # Run every 15 minutes during game windows.
+    # NCAA games typically tip from 12pm-10pm ET and finish by ~midnight ET.
+    # UTC is ET+4 during EDT (March-April).
+    - cron: '*/15 12-23 * 3 *'
+    - cron: '*/15 0-4 * 3-4 *'
+    - cron: '*/15 0-4 * 4 *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
           node-version: '20'
 
       - name: Fetch and update scores
-        run: node scripts/update-scores.js
+        run: node update-scores.js
 
       - name: Commit and push if changed
         run: |
@@ -36,7 +36,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No score changes detected"
           else
-            git commit -m "🏀 Auto-update scores — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "🏀 Auto-update scores - $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
             echo "Scores updated and pushed!"
           fi

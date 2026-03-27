@@ -1,95 +1,12 @@
-// ============================================================
-// BRACKET STRUCTURE — hardcoded, doesn't change
-// ============================================================
-const GAMES = {
-  FF1: { round:'ff',  top:'NC State',     tSeed:11, bot:'Texas',         bSeed:11, feedsTo:'W5' },
-  FF2: { round:'ff',  top:'UMBC',         tSeed:16, bot:'Howard',        bSeed:16, feedsTo:'M1' },
-  FF3: { round:'ff',  top:'SMU',          tSeed:11, bot:'Miami (OH)',     bSeed:11, feedsTo:'M5' },
-  FF4: { round:'ff',  top:'Prairie View', tSeed:16, bot:'Lehigh',        bSeed:16, feedsTo:'S1' },
-
-  E1: { round:'r1', region:'east',    top:'Duke',         tSeed:1,  bot:'Siena',         bSeed:16 },
-  E2: { round:'r1', region:'east',    top:'Ohio St.',     tSeed:8,  bot:'TCU',           bSeed:9  },
-  E3: { round:'r1', region:'east',    top:"St. John's",   tSeed:5,  bot:'UNI',           bSeed:12 },
-  E4: { round:'r1', region:'east',    top:'Kansas',       tSeed:4,  bot:'Cal Baptist',   bSeed:13 },
-  E5: { round:'r1', region:'east',    top:'Louisville',   tSeed:6,  bot:'South Florida', bSeed:11 },
-  E6: { round:'r1', region:'east',    top:'Michigan St.', tSeed:3,  bot:'N. Dakota St.', bSeed:14 },
-  E7: { round:'r1', region:'east',    top:'UCLA',         tSeed:7,  bot:'UCF',           bSeed:10 },
-  E8: { round:'r1', region:'east',    top:'UConn',        tSeed:2,  bot:'Furman',        bSeed:15 },
-
-  E9:  { round:'r2',  region:'east',    src:['E1','E2']   },
-  E10: { round:'r2',  region:'east',    src:['E3','E4']   },
-  E11: { round:'r2',  region:'east',    src:['E5','E6']   },
-  E12: { round:'r2',  region:'east',    src:['E7','E8']   },
-  E13: { round:'s16', region:'east',    src:['E9','E10']  },
-  E14: { round:'s16', region:'east',    src:['E11','E12'] },
-  E15: { round:'e8',  region:'east',    src:['E13','E14'] },
-
-  W1: { round:'r1', region:'west',    top:'Arizona',    tSeed:1,  bot:'LIU',           bSeed:16 },
-  W2: { round:'r1', region:'west',    top:'Villanova',  tSeed:8,  bot:'Utah St.',      bSeed:9  },
-  W3: { round:'r1', region:'west',    top:'Wisconsin',  tSeed:5,  bot:'High Point',    bSeed:12 },
-  W4: { round:'r1', region:'west',    top:'Arkansas',   tSeed:4,  bot:'Hawaii',        bSeed:13 },
-  W5: { round:'r1', region:'west',    top:'BYU',        tSeed:6,  bot:null,            bSeed:11, ffSrc:'FF1' },
-  W6: { round:'r1', region:'west',    top:'Gonzaga',    tSeed:3,  bot:'Kennesaw St.',  bSeed:14 },
-  W7: { round:'r1', region:'west',    top:'Miami (FL)', tSeed:7,  bot:'Missouri',      bSeed:10 },
-  W8: { round:'r1', region:'west',    top:'Purdue',     tSeed:2,  bot:'Queens',        bSeed:15 },
-
-  W9:  { round:'r2',  region:'west',    src:['W1','W2']   },
-  W10: { round:'r2',  region:'west',    src:['W3','W4']   },
-  W11: { round:'r2',  region:'west',    src:['W5','W6']   },
-  W12: { round:'r2',  region:'west',    src:['W7','W8']   },
-  W13: { round:'s16', region:'west',    src:['W9','W10']  },
-  W14: { round:'s16', region:'west',    src:['W11','W12'] },
-  W15: { round:'e8',  region:'west',    src:['W13','W14'] },
-
-  M1: { round:'r1', region:'midwest', top:'Michigan',   tSeed:1,  bot:null,            bSeed:16, ffSrc:'FF2' },
-  M2: { round:'r1', region:'midwest', top:'Georgia',    tSeed:8,  bot:'Saint Louis',   bSeed:9  },
-  M3: { round:'r1', region:'midwest', top:'Texas Tech', tSeed:5,  bot:'Akron',         bSeed:12 },
-  M4: { round:'r1', region:'midwest', top:'Alabama',    tSeed:4,  bot:'Hofstra',       bSeed:13 },
-  M5: { round:'r1', region:'midwest', top:'Tennessee',  tSeed:6,  bot:null,            bSeed:11, ffSrc:'FF3' },
-  M6: { round:'r1', region:'midwest', top:'Virginia',   tSeed:3,  bot:'Wright St.',    bSeed:14 },
-  M7: { round:'r1', region:'midwest', top:'Kentucky',   tSeed:7,  bot:'Santa Clara',   bSeed:10 },
-  M8: { round:'r1', region:'midwest', top:'Iowa St.',   tSeed:2,  bot:'Tennessee St.', bSeed:15 },
-
-  M9:  { round:'r2',  region:'midwest', src:['M1','M2']   },
-  M10: { round:'r2',  region:'midwest', src:['M3','M4']   },
-  M11: { round:'r2',  region:'midwest', src:['M5','M6']   },
-  M12: { round:'r2',  region:'midwest', src:['M7','M8']   },
-  M13: { round:'s16', region:'midwest', src:['M9','M10']  },
-  M14: { round:'s16', region:'midwest', src:['M11','M12'] },
-  M15: { round:'e8',  region:'midwest', src:['M13','M14'] },
-
-  S1: { round:'r1', region:'south',   top:'Florida',     tSeed:1,  bot:null,           bSeed:16, ffSrc:'FF4' },
-  S2: { round:'r1', region:'south',   top:'Clemson',     tSeed:8,  bot:'Iowa',         bSeed:9  },
-  S3: { round:'r1', region:'south',   top:'Vanderbilt',  tSeed:5,  bot:'McNeese',      bSeed:12 },
-  S4: { round:'r1', region:'south',   top:'Nebraska',    tSeed:4,  bot:'Troy',         bSeed:13 },
-  S5: { round:'r1', region:'south',   top:'N. Carolina', tSeed:6,  bot:'VCU',          bSeed:11 },
-  S6: { round:'r1', region:'south',   top:'Illinois',    tSeed:3,  bot:'Penn',         bSeed:14 },
-  S7: { round:'r1', region:'south',   top:"Saint Mary's",tSeed:7,  bot:'Texas A&M',    bSeed:10 },
-  S8: { round:'r1', region:'south',   top:'Houston',     tSeed:2,  bot:'Idaho',        bSeed:15 },
-
-  S9:  { round:'r2',  region:'south',   src:['S1','S2']   },
-  S10: { round:'r2',  region:'south',   src:['S3','S4']   },
-  S11: { round:'r2',  region:'south',   src:['S5','S6']   },
-  S12: { round:'r2',  region:'south',   src:['S7','S8']   },
-  S13: { round:'s16', region:'south',   src:['S9','S10']  },
-  S14: { round:'s16', region:'south',   src:['S11','S12'] },
-  S15: { round:'e8',  region:'south',   src:['S13','S14'] },
-
-  FF5: { round:'ff2', label:'East vs South',    src:['E15','S15'] },
-  FF6: { round:'ff2', label:'West vs Midwest',  src:['W15','M15'] },
-  NC:  { round:'nc',  label:'National Championship', src:['FF5','FF6'] }
-};
-
-const RG = {
-  east:    { r1:['E1','E2','E3','E4','E5','E6','E7','E8'], r2:['E9','E10','E11','E12'], s16:['E13','E14'], e8:['E15'] },
-  west:    { r1:['W1','W2','W3','W4','W5','W6','W7','W8'], r2:['W9','W10','W11','W12'], s16:['W13','W14'], e8:['W15'] },
-  midwest: { r1:['M1','M2','M3','M4','M5','M6','M7','M8'], r2:['M9','M10','M11','M12'], s16:['M13','M14'], e8:['M15'] },
-  south:   { r1:['S1','S2','S3','S4','S5','S6','S7','S8'], r2:['S9','S10','S11','S12'], s16:['S13','S14'], e8:['S15'] }
-};
-
-const RLABELS = { ff:'First Four', r1:'Round of 64', r2:'Round of 32', s16:'Sweet 16', e8:'Elite 8', ff2:'Final Four', nc:'Championship' };
-const RPTS    = { r1:10, r2:20, s16:40, e8:80, ff2:160, nc:320 };
-const RSHORT  = { r1:'R64', r2:'R32', s16:'S16', e8:'E8', ff2:'FF', nc:'NC' };
+const {
+  ESPN_TO_LOCAL,
+  GAMES,
+  LOGO_MAP,
+  RG,
+  RLABELS,
+  RPTS,
+  RSHORT
+} = globalThis.BRACKET_CONFIG;
 
 // ============================================================
 // STATE
@@ -100,7 +17,7 @@ let prevRanks = {}; // track previous ranks for arrows
 
 const WSTEPS = [
   { title:'Who Are You?',          type:'name' },
-  { title:'First Four',            type:'games', games:['FF1','FF2','FF3','FF4'],                         sub:'Play-in round — pick the survivors' },
+  { title:'First Four',            type:'games', games:['FF1','FF2','FF3','FF4'],                         sub:'Play-in round — pick the survivors (not scored)' },
   { title:'East — Round 1',        type:'games', games:['E1','E2','E3','E4','E5','E6','E7','E8'],         sub:'8 games · 10 pts each' },
   { title:'East — Round 2',        type:'games', games:['E9','E10','E11','E12'],                          sub:'Round of 32 · 20 pts each' },
   { title:'East — Sweet 16 & E8',  type:'games', games:['E13','E14','E15'],                              sub:'Sweet 16: 40 pts · Elite 8: 80 pts' },
@@ -254,50 +171,26 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// ============================================================
-// NAVIGATION
-// ============================================================
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.getElementById('nav-'  + name).classList.add('active');
-  // Clear champion sidebar card when not on bracket view
-  if (name !== 'bracket') {
-    const champEl = document.getElementById('sidebar-champ');
-    if (champEl) champEl.innerHTML = '';
-  }
-}
-
-// ============================================================
-// ROUND PILLS
-// ============================================================
-function renderPills() {
-  const results = appData?.results || {};
-  const done = new Set(Object.keys(results).map(id => GAMES[id]?.round).filter(Boolean));
+function getRoundState(results) {
   const rounds = ['ff','r1','r2','s16','e8','ff2','nc'];
-
-  // Find the current round: the latest round with results, OR the next round
-  // if the previous round is fully complete
+  const done = new Set(Object.keys(results || {}).map(id => GAMES[id]?.round).filter(Boolean));
   const allGamesByRound = {};
+
   for (const [gid, g] of Object.entries(GAMES)) {
-    if (g.round && RPTS[g.round]) {
+    if (g.round) {
       if (!allGamesByRound[g.round]) allGamesByRound[g.round] = [];
       allGamesByRound[g.round].push(gid);
     }
   }
 
-  // Determine which rounds are fully complete
   const fullyComplete = new Set();
   for (const r of rounds) {
     const games = allGamesByRound[r] || [];
-    if (games.length > 0 && games.every(gid => results[gid])) {
+    if (games.length > 0 && games.every(gid => results?.[gid])) {
       fullyComplete.add(r);
     }
   }
 
-  // Current round = first round that has results but isn't fully complete,
-  // OR if last completed round is done, the next round is current
   let currentRound = null;
   for (let i = 0; i < rounds.length; i++) {
     const r = rounds[i];
@@ -310,12 +203,261 @@ function renderPills() {
       break;
     }
   }
-  // Fallback: if all completed rounds are fully done, current = next one
   if (!currentRound) {
-    for (let i = 0; i < rounds.length; i++) {
-      if (!fullyComplete.has(rounds[i])) { currentRound = rounds[i]; break; }
+    for (const r of rounds) {
+      if (!fullyComplete.has(r)) { currentRound = r; break; }
     }
   }
+
+  return { rounds, done, fullyComplete, currentRound };
+}
+
+function getEliminatedTeams(results) {
+  const eliminatedTeams = new Set();
+  for (const [gid, winner] of Object.entries(results || {})) {
+    const g = GAMES[gid];
+    if (!g) continue;
+    const [t1, t2] = getTeams(gid, null, results);
+    if (t1 && t1 !== winner) eliminatedTeams.add(t1);
+    if (t2 && t2 !== winner) eliminatedTeams.add(t2);
+  }
+  return eliminatedTeams;
+}
+
+function maxPossibleScore(picks, results) {
+  let total = score(picks, results).total;
+  for (const [gid, g] of Object.entries(GAMES)) {
+    if (!RPTS[g.round] || results?.[gid]) continue;
+    if (picks?.[gid] && isPickStillAlive(gid, picks[gid], results)) {
+      total += RPTS[g.round];
+    }
+  }
+  return total;
+}
+
+function getParticipantRows(resultsOverride) {
+  if (!appData) return [];
+  const results = resultsOverride || appData.results || {};
+  const rows = appData.participants.map(p => ({
+    ...p,
+    sc: score(p.picks, results),
+    acc: accuracy(p.picks, results),
+    maxPossible: maxPossibleScore(p.picks, results),
+  }));
+
+  rows.sort((a,b) => {
+    const aH = hasPicks(a), bH = hasPicks(b);
+    if (aH && !bH) return -1;
+    if (!aH && bH) return 1;
+    return (b.sc.total - a.sc.total)
+      || (b.maxPossible - a.maxPossible)
+      || a.name.localeCompare(b.name);
+  });
+
+  return rows;
+}
+
+function getLatestCompletedGame(results) {
+  if (!appData?.schedule) return null;
+  let latest = null;
+  const dates = Object.keys(appData.schedule).sort();
+  dates.forEach(date => {
+    const day = appData.schedule[date];
+    (day.games || []).forEach((sg, index) => {
+      if (!results?.[sg.id]) return;
+      const [t1, t2] = getTeams(sg.id, null, results);
+      const winner = results[sg.id];
+      const loser = winner === t1 ? t2 : t1;
+      latest = { ...sg, label: day.label, date, order: index, winner, loser };
+    });
+  });
+  return latest;
+}
+
+function renderTournamentPulse(rows, results) {
+  const withPicks = rows.filter(p => hasPicks(p));
+  if (!withPicks.length) return '';
+
+  const leader = withPicks[0];
+  const latest = getLatestCompletedGame(results);
+  const { currentRound } = getRoundState(results);
+  const deadChampions = withPicks.filter(p => p.picks?.NC && isTeamEliminated(p.picks.NC, results)).length;
+  const trailingPack = withPicks.slice(1).filter(p => p.sc.total === withPicks[1]?.sc.total);
+  let cushionMain = 'Solo board';
+  let cushionSub = 'Only one bracket is currently in the field.';
+  if (withPicks.length > 1) {
+    const gap = leader.sc.total - withPicks[1].sc.total;
+    if (gap === 0) {
+      const tiedLeaders = withPicks.filter(p => p.sc.total === leader.sc.total).map(p => p.name);
+      cushionMain = 'Tied up top';
+      cushionSub = `${tiedLeaders.join(', ')} all sit at ${leader.sc.total} pts.`;
+    } else {
+      const chaserNames = trailingPack.map(p => p.name).join(', ');
+      cushionMain = `${gap}-pt lead`;
+      cushionSub = `${leader.name} over ${chaserNames} for 1st place.`;
+    }
+  }
+
+  let humanPts = 0;
+  let aiPts = 0;
+  withPicks.forEach(p => {
+    if (p.type === 'ai') aiPts += p.sc.total;
+    else humanPts += p.sc.total;
+  });
+  const sideLead = humanPts === aiPts ? 'Dead even' : humanPts > aiPts ? 'Humans ahead' : 'AI ahead';
+  const sideGap = Math.abs(humanPts - aiPts);
+
+  const cards = [
+    {
+      kicker: 'Round Status',
+      main: RLABELS[currentRound] || 'Tournament Live',
+      sub: latest ? `${latest.label}` : 'Waiting on the next game block.'
+    },
+    {
+      kicker: 'Leaderboard',
+      main: esc(leader.name),
+      sub: `${leader.sc.total} pts · max path ${leader.maxPossible}`
+    },
+    {
+      kicker: 'Leader Cushion',
+      main: cushionMain,
+      sub: cushionSub
+    },
+    {
+      kicker: 'Bracket Damage',
+      main: `${deadChampions}/${withPicks.length}`,
+      sub: `${deadChampions === 1 ? 'champion pick is dead' : 'champion picks are dead'} · ${sideLead}${sideGap ? ` by ${sideGap}` : ''}`
+    }
+  ];
+
+  return cards.map(card => `
+    <div class="update-card">
+      <div class="update-kicker">${card.kicker}</div>
+      <div class="update-main">${card.main}</div>
+      <div class="update-sub">${card.sub}</div>
+    </div>
+  `).join('');
+}
+
+function renderWhoCanStillWin(rows) {
+  const withPicks = rows.filter(p => hasPicks(p));
+  if (!withPicks.length) {
+    return '<div class="callout-empty">Win paths will appear once picks are loaded</div>';
+  }
+
+  const currentLead = withPicks[0].sc.total;
+  const aliveRows = withPicks
+    .filter(p => p.maxPossible >= currentLead)
+    .sort((a, b) => (b.maxPossible - a.maxPossible) || (b.sc.total - a.sc.total))
+    .slice(0, 6);
+
+  return aliveRows.map(p => {
+    const margin = p.maxPossible - currentLead;
+    const champAlive = p.picks?.NC && !isTeamEliminated(p.picks.NC, appData.results || {});
+    const champText = p.picks?.NC ? `${champAlive ? 'champ alive' : 'champ dead'} · ${esc(p.picks.NC)}` : 'no champion pick';
+    return `<div class="win-path">
+      <div class="win-path-top">
+        <div class="win-path-name">${esc(p.name)}</div>
+        <div class="win-path-max">${p.maxPossible}</div>
+      </div>
+      <div class="win-path-sub">${p.sc.total} current · ${margin} pts above the current lead ceiling · ${champText}</div>
+    </div>`;
+  }).join('');
+}
+
+function getFutureSwingGames(primary, secondary, results) {
+  const swings = [];
+  for (const [gid, g] of Object.entries(GAMES)) {
+    if (!RPTS[g.round] || results?.[gid]) continue;
+    const aPick = primary.picks?.[gid];
+    const bPick = secondary.picks?.[gid];
+    if (!aPick || !bPick || aPick === bPick) continue;
+
+    const aAlive = isPickStillAlive(gid, aPick, results);
+    const bAlive = isPickStillAlive(gid, bPick, results);
+    if (!aAlive && !bAlive) continue;
+
+    swings.push({
+      gid,
+      points: RPTS[g.round],
+      aPick,
+      bPick,
+      aAlive,
+      bAlive,
+      round: g.round,
+    });
+  }
+
+  swings.sort((a, b) => b.points - a.points || a.gid.localeCompare(b.gid));
+  return swings;
+}
+
+function renderComparePanel(primary, secondary, results) {
+  const secondaryScore = score(secondary.picks, results);
+  const pointGap = primary.sc.total - secondaryScore.total;
+  const pickDiffs = Object.keys(GAMES).filter(gid => primary.picks?.[gid] && secondary.picks?.[gid] && primary.picks[gid] !== secondary.picks[gid]).length;
+  const swings = getFutureSwingGames(primary, secondary, results);
+  const liveSwingPts = swings.reduce((sum, swing) => sum + swing.points, 0);
+  const primaryChamp = primary.picks?.NC || 'No champion';
+  const secondaryChamp = secondary.picks?.NC || 'No champion';
+
+  const swingHtml = swings.slice(0, 6).map(swing => `
+    <div class="compare-swing">
+      <div class="compare-points">${swing.points}</div>
+      <div>
+        <div class="compare-swing-main">${esc(primary.name)}: ${esc(swing.aPick)} ${swing.aAlive ? '• alive' : '• dead'}<br>${esc(secondary.name)}: ${esc(swing.bPick)} ${swing.bAlive ? '• alive' : '• dead'}</div>
+        <div class="compare-swing-sub">${swing.gid} · ${RLABELS[swing.round]}</div>
+      </div>
+    </div>
+  `).join('');
+
+  return `<div class="compare-wrap">
+    <div class="compare-head">
+      <div class="compare-title">${esc(primary.name)} vs ${esc(secondary.name)}</div>
+      <div class="compare-sub">${esc(primaryChamp)} vs ${esc(secondaryChamp)}</div>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-stat">
+        <div class="compare-stat-val" style="color:${pointGap >= 0 ? 'var(--green)' : 'var(--red)'}">${pointGap > 0 ? '+' : ''}${pointGap}</div>
+        <div class="compare-stat-lbl">Current Points Gap</div>
+      </div>
+      <div class="compare-stat">
+        <div class="compare-stat-val">${pickDiffs}</div>
+        <div class="compare-stat-lbl">Different Picks</div>
+      </div>
+      <div class="compare-stat">
+        <div class="compare-stat-val">${liveSwingPts}</div>
+        <div class="compare-stat-lbl">Live Swing Points</div>
+      </div>
+    </div>
+    <div class="compare-swings">
+      ${swingHtml || `<div class="compare-empty">No future swing games remain between these brackets. The race is down to already-scored differences.</div>`}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-'  + name).classList.add('active');
+  if (name === 'bracket') {
+    renderBracket();
+  } else {
+    const champEl = document.getElementById('sidebar-champ');
+    if (champEl) champEl.innerHTML = '';
+  }
+}
+
+// ============================================================
+// ROUND PILLS
+// ============================================================
+function renderPills() {
+  const results = appData?.results || {};
+  const { rounds, fullyComplete, currentRound } = getRoundState(results);
 
   const html = rounds.map(r => {
     let cls;
@@ -347,11 +489,13 @@ function renderPills() {
 function populateBktSelect() {
   if (!appData) return;
   const sel = document.getElementById('bkt-select');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— Choose a participant —</option>' +
-    appData.participants.map(p =>
-      '<option value="' + p.id + '">' + esc(p.name) + (p.type==='ai'?' (AI)':'') + '</option>'
-    ).join('');
+  const compareSel = document.getElementById('compare-select');
+  if (!sel || !compareSel) return;
+  const options = appData.participants.map(p =>
+    '<option value="' + p.id + '">' + esc(p.name) + (p.type==='ai'?' (AI)':'') + '</option>'
+  ).join('');
+  sel.innerHTML = '<option value="">— Choose a participant —</option>' + options;
+  compareSel.innerHTML = '<option value="">No comparison</option>' + options;
 }
 
 function viewBkt(id) {
@@ -366,17 +510,7 @@ function viewBkt(id) {
 function renderLeaderboard() {
   if (!appData) return;
   const results = appData.results || {};
-
-  const rows = appData.participants.map(p => ({
-    ...p, sc: score(p.picks, results), acc: accuracy(p.picks, results)
-  }));
-
-  rows.sort((a,b) => {
-    const aH = hasPicks(a), bH = hasPicks(b);
-    if (aH && !bH) return -1;
-    if (!aH && bH) return 1;
-    return b.sc.total - a.sc.total;
-  });
+  const rows = getParticipantRows(results);
 
   // === HUMANS vs AI BAR ===
   let humanPts = 0, humanCount = 0, aiPts = 0, aiCount = 0;
@@ -397,6 +531,8 @@ function renderLeaderboard() {
       <div class="hva-track"><div class="hva-fill" style="width:${humanPct}%"></div><div class="hva-mid"></div></div>
     </div>`;
   } else { hvaEl.innerHTML = ''; }
+  document.getElementById('lb-updates').innerHTML = renderTournamentPulse(rows, results);
+  document.getElementById('wcw-list').innerHTML = renderWhoCanStillWin(rows);
 
   // === BEST PICK / WORST MISS CALLOUTS (right sidebar) ===
   const calloutsEl = document.getElementById('lb-callouts');
@@ -457,14 +593,7 @@ function renderLeaderboard() {
     }
     // "Still alive" — who has the most unique teams in their bracket that are still in the tournament
     // A team is "eliminated" if they lost any game in the results
-    const eliminatedTeams = new Set();
-    for (const [gid, winner] of Object.entries(results)) {
-      const g = GAMES[gid];
-      if (!g) continue;
-      const [t1, t2] = getTeams(gid, null, results);
-      if (t1 && t1 !== winner) eliminatedTeams.add(t1);
-      if (t2 && t2 !== winner) eliminatedTeams.add(t2);
-    }
+    const eliminatedTeams = getEliminatedTeams(results);
 
     let bestAlive = null;
     let bestAliveCount = 0;
@@ -506,6 +635,7 @@ function renderLeaderboard() {
     const rankDisp = has ? rank : '—';
     const rankCls  = has ? (rank===1?'r1':rank===2?'r2':rank===3?'r3':'') : '';
     const aiCls    = p.type==='ai' ? 'ai' : '';
+    const tied = has && rows[i - 1] && hasPicks(rows[i - 1]) && rows[i - 1].sc.total === p.sc.total;
 
     // Track rank for arrows
     if (has) newRanks[p.id] = rank;
@@ -535,6 +665,15 @@ function renderLeaderboard() {
       return `<span class="${pts>0?'hit':''}">${RSHORT[r]}: ${pts}</span>`;
     }).join('') :
       `<span class="no-picks-msg">Picks not submitted · <a href="#" onclick="event.preventDefault();showView('enter')">Enter now →</a></span>`;
+    const remaining = has ? Math.max(0, p.maxPossible - p.sc.total) : 0;
+    const champOut = has && p.picks?.NC ? isTeamEliminated(p.picks.NC, results) : false;
+    const outlook = has ? `
+      <div class="lb-outlook">
+        <span class="ceiling">Max ${p.maxPossible}</span>
+        <span>Left ${remaining}</span>
+        <span class="${champOut ? 'dead' : 'alive'}">${champOut ? 'Champion out' : 'Champion alive'}</span>
+        ${tied ? '<span class="tie-note">Tied on current score</span>' : ''}
+      </div>` : '';
 
     const delay = `animation-delay:${i*0.055}s`;
     const pts   = has ? p.sc.total : '—';
@@ -547,6 +686,7 @@ function renderLeaderboard() {
           <div class="lb-name">${esc(p.name)} ${badge}</div>
           ${champHtml}
           <div class="lb-breakdown">${breakdown}</div>
+          ${outlook}
         </div>
         <div class="lb-score">
           <div class="lb-pts" style="${has && p.color ? 'color:'+p.color : ''}">${pts}</div>
@@ -662,6 +802,7 @@ function gameLineHtml(gid, picks, results) {
 function renderBracket() {
   if (!appData) return;
   const id = document.getElementById('bkt-select').value;
+  const compareId = document.getElementById('compare-select')?.value;
   const el = document.getElementById('bkt-content');
   if (!id) { el.innerHTML = '<div class="empty-state">Select a participant above</div>'; return; }
   const p = appData.participants.find(x => x.id === id);
@@ -686,6 +827,13 @@ function renderBracket() {
   };
 
   const regHtml = Object.keys(RG).map(r => renderRegion(r, regionMeta[r], picks, results)).join('');
+  let compareHtml = '';
+  if (compareId && compareId !== id) {
+    const secondary = appData.participants.find(x => x.id === compareId);
+    if (secondary && hasPicks(secondary)) {
+      compareHtml = renderComparePanel({ ...p, sc }, secondary, results);
+    }
+  }
 
   const ff5t = getTeams('FF5', picks, results);
   const ff6t = getTeams('FF6', picks, results);
@@ -722,7 +870,7 @@ function renderBracket() {
     champEl.innerHTML = '';
   }
 
-  el.innerHTML = statsHtml + regHtml + ffHtml;
+  el.innerHTML = statsHtml + compareHtml + regHtml + ffHtml;
 }
 
 // ============================================================
@@ -901,7 +1049,7 @@ function adminLogout() {
 // ADMIN — GITHUB CONFIG
 // ============================================================
 let ghConfig = {};
-let pendingResults = {}; // changes not yet pushed
+let pendingResults = {}; // changes not yet pushed; null means clear a committed result
 
 function loadGhConfig() {
   try {
@@ -970,7 +1118,12 @@ const ROUND_ORDER_ADMIN = [
 
 function renderAdminRounds() {
   if (!appData) return;
-  const results  = { ...appData.results, ...pendingResults };
+  const results  = { ...(appData.results || {}) };
+  Object.entries(pendingResults).forEach(([gid, winner]) => {
+    if (gid === '__names_updated') return;
+    if (winner == null) delete results[gid];
+    else results[gid] = winner;
+  });
   const container = document.getElementById('admin-rounds');
 
   container.innerHTML = ROUND_ORDER_ADMIN.map(rnd => {
@@ -978,7 +1131,7 @@ function renderAdminRounds() {
     const gamesHtml = rnd.games.map(gid => {
       const [t1,t2] = getTeams(gid, null, results);
       const winner  = results[gid];
-      const isPend  = pendingResults[gid];
+      const isPend  = Object.prototype.hasOwnProperty.call(pendingResults, gid);
       const g = GAMES[gid];
 
       const s1 = g?.tSeed; const s2 = g?.bSeed;
@@ -1025,19 +1178,20 @@ function setResult(gid, team) {
 }
 
 function clearResult(gid) {
-  delete pendingResults[gid];
-  if (appData?.results?.[gid]) delete appData.results[gid]; // remove from base too if clearing committed
+  if (appData?.results?.[gid]) pendingResults[gid] = null;
+  else delete pendingResults[gid];
   renderAdminRounds();
   updatePushBar();
 }
 
 function updatePushBar() {
-  const n = Object.keys(pendingResults).length;
+  const resultKeys = Object.keys(pendingResults).filter(k => k !== '__names_updated');
+  const n = resultKeys.length + (pendingResults.__names_updated ? 1 : 0);
   const btn = document.getElementById('push-btn');
   const pending = document.getElementById('push-pending');
   btn.disabled = n === 0;
   pending.innerHTML = n > 0 
-    ? `<strong>${n}</strong> pending result${n===1?'':'s'} — not yet saved`
+    ? `<strong>${n}</strong> pending change${n===1?'':'s'} — not yet saved`
     : 'No pending changes';
   document.getElementById('push-status').textContent = '';
   document.getElementById('push-status').className   = 'push-status';
@@ -1074,7 +1228,6 @@ function saveParticipants() {
 async function pushResults() {
   if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
     document.getElementById('gh-config').style.display = 'block';
-    toggleGhConfig();
     setGhStatus('err','Configure GitHub first');
     return;
   }
@@ -1082,7 +1235,9 @@ async function pushResults() {
   // Build confirmation summary
   const resultKeys = Object.keys(pendingResults).filter(k => k !== '__names_updated');
   if (resultKeys.length > 0) {
-    const summary = resultKeys.map(gid => `${gid}: ${pendingResults[gid]}`).join('\n');
+    const summary = resultKeys.map(gid =>
+      pendingResults[gid] == null ? `${gid}: clear result` : `${gid}: ${pendingResults[gid]}`
+    ).join('\n');
     if (!confirm(`Push ${resultKeys.length} result${resultKeys.length===1?'':'s'}?\n\n${summary}\n\nConfirm?`)) return;
   }
 
@@ -1095,7 +1250,11 @@ async function pushResults() {
   // Merge pending into data
   const nameUpdated = pendingResults['__names_updated'];
   delete pendingResults['__names_updated'];
-  const newResults = { ...(appData.results || {}), ...pendingResults };
+  const newResults = { ...(appData.results || {}) };
+  Object.entries(pendingResults).forEach(([gid, winner]) => {
+    if (winner == null) delete newResults[gid];
+    else newResults[gid] = winner;
+  });
   const newData    = { ...appData, results: newResults, meta: { ...appData.meta, updated: new Date().toISOString() } };
 
   const apiBase = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json`;
@@ -1139,6 +1298,7 @@ async function pushResults() {
     renderAdminRounds();
     renderAdminParticipants();
     renderSidebar();
+    renderBracket();
     setTimeout(() => { statusEl.textContent=''; statusEl.className='push-status'; }, 4000);
 
   } catch(err) {
@@ -1150,40 +1310,23 @@ async function pushResults() {
 }
 
 // ============================================================
-// SIDEBAR — TODAY'S GAMES
-// ============================================================
-const LOGO_MAP = {
-  'Duke':'150','Siena':'399','Ohio St.':'194','TCU':'2628','St. John\'s':'2599',
-  'N. Iowa':'2460','Kansas':'2305','Cal Baptist':'2856','Louisville':'97',
-  'South Florida':'58','Michigan St.':'127','N. Dakota St.':'2449','UCLA':'26',
-  'UCF':'2116','UConn':'41','Furman':'231','Arizona':'12','LIU':'288',
-  'Villanova':'2918','Utah St.':'328','Wisconsin':'275','High Point':'2314',
-  'Arkansas':'8','Hawaii':'62','BYU':'252','Texas':'251','Gonzaga':'2250',
-  'Kennesaw St.':'2320','Miami (FL)':'2390','Missouri':'142','Purdue':'2509',
-  'Queens':'2514','Michigan':'130','Howard':'47','Georgia':'61','Saint Louis':'139',
-  'Texas Tech':'2641','Akron':'2006','Alabama':'333','Hofstra':'2275',
-  'Tennessee':'2633','Miami (OH)':'193','SMU':'2567','Virginia':'258',
-  'Wright St.':'2750','Kentucky':'96','Santa Clara':'2541','Iowa St.':'66',
-  'Tennessee St.':'2634','Florida':'57','Prairie View':'2504','Lehigh':'2329',
-  'Clemson':'228','Iowa':'2294','Vanderbilt':'238','McNeese':'2377',
-  'Nebraska':'158','Troy':'2653','N. Carolina':'153','VCU':'2670',
-  'Illinois':'356','Penn':'219','Saint Mary\'s':'2535','Texas A&M':'245',
-  'Houston':'248','Idaho':'70','NC State':'152','UMBC':'2378'
-};
-
-// ============================================================
 // LIVE SCORES (via Cloudflare Worker proxy)
 // Set this to your Cloudflare Worker URL after deploying cloudflare-worker.js
 // Leave empty to disable live scores
 // ============================================================
 const LIVE_SCORES_URL = 'https://espn-scores.spencer-018.workers.dev';
 
-let liveScores = {}; // { 'TeamName': { score: '45', status: 'live'|'final'|'pre', clock: '12:34', period: 1 } }
+let liveScoresByDate = {}; // { 'YYYY-MM-DD': { TeamName: { score, status, clock, period, detail } } }
+let selectedSidebarDateKey = null;
 
-async function fetchLiveScores() {
-  if (!LIVE_SCORES_URL) return;
+function getSidebarLiveScores(dateKey) {
+  return liveScoresByDate[dateKey] || {};
+}
+
+async function fetchLiveScores(dateKey) {
+  if (!LIVE_SCORES_URL || !dateKey) return;
   try {
-    const res = await fetch(LIVE_SCORES_URL + '?_=' + Date.now());
+    const res = await fetch(`${LIVE_SCORES_URL}?date=${dateKey.replace(/-/g, '')}&_=${Date.now()}`);
     if (!res.ok) return;
     const data = await res.json();
     const newScores = {};
@@ -1206,8 +1349,8 @@ async function fetchLiveScores() {
         }
       });
     });
-    liveScores = newScores;
-    renderSidebar(); // re-render sidebar with live scores
+    liveScoresByDate[dateKey] = newScores;
+    if (selectedSidebarDateKey === dateKey) renderSidebar();
   } catch(e) {
     // Silent fail
   }
@@ -1215,40 +1358,36 @@ async function fetchLiveScores() {
 
 // Simple ESPN name normalizer for live scores (subset of the full mapping in update-scores.js)
 function normalizeESPNName(name) {
-  const map = {
-    'Duke Blue Devils':'Duke','Ohio State Buckeyes':'Ohio St.','TCU Horned Frogs':'TCU',
-    "St. John's Red Storm":"St. John's",'Kansas Jayhawks':'Kansas','California Baptist Lancers':'Cal Baptist',
-    'Louisville Cardinals':'Louisville','South Florida Bulls':'South Florida','Michigan State Spartans':'Michigan St.',
-    'North Dakota State Bison':'N. Dakota St.','UCLA Bruins':'UCLA','UCF Knights':'UCF',
-    'UConn Huskies':'UConn','Connecticut Huskies':'UConn','Furman Paladins':'Furman',
-    'Arizona Wildcats':'Arizona','LIU Sharks':'LIU','Long Island University Sharks':'LIU',
-    'Villanova Wildcats':'Villanova','Utah State Aggies':'Utah St.','Wisconsin Badgers':'Wisconsin',
-    'High Point Panthers':'High Point','Arkansas Razorbacks':'Arkansas','BYU Cougars':'BYU',
-    'Gonzaga Bulldogs':'Gonzaga','Kennesaw State Owls':'Kennesaw St.','Miami Hurricanes':'Miami (FL)',
-    'Missouri Tigers':'Missouri','Purdue Boilermakers':'Purdue','Queens Royals':'Queens',
-    'Queens University Royals':'Queens',
-    'Michigan Wolverines':'Michigan','Georgia Bulldogs':'Georgia','Saint Louis Billikens':'Saint Louis',
-    'Texas Tech Red Raiders':'Texas Tech','Akron Zips':'Akron','Alabama Crimson Tide':'Alabama',
-    'Hofstra Pride':'Hofstra','Tennessee Volunteers':'Tennessee','Virginia Cavaliers':'Virginia',
-    'Wright State Raiders':'Wright St.','Kentucky Wildcats':'Kentucky','Santa Clara Broncos':'Santa Clara',
-    'Iowa State Cyclones':'Iowa St.','Tennessee State Tigers':'Tennessee St.',
-    'Florida Gators':'Florida','Clemson Tigers':'Clemson','Iowa Hawkeyes':'Iowa',
-    'Vanderbilt Commodores':'Vanderbilt','McNeese Cowboys':'McNeese','Nebraska Cornhuskers':'Nebraska',
-    'Troy Trojans':'Troy','North Carolina Tar Heels':'N. Carolina','VCU Rams':'VCU',
-    'Illinois Fighting Illini':'Illinois','Penn Quakers':'Penn',"Saint Mary's Gaels":"Saint Mary's",
-    'Texas A&M Aggies':'Texas A&M','Houston Cougars':'Houston','Idaho Vandals':'Idaho',
-    'Texas Longhorns':'Texas','Howard Bison':'Howard','Miami (OH) RedHawks':'Miami (OH)',
-    'Prairie View A&M Panthers':'Prairie View','NC State Wolfpack':'NC State',
-    'Northern Iowa Panthers':'UNI','Siena Saints':'Siena',
-    "Hawai'i Rainbow Warriors":'Hawaii','Hawaii Rainbow Warriors':'Hawaii'
-  };
-  return map[name] || null;
+  return ESPN_TO_LOCAL[name] || null;
 }
 
 function teamLogo(name) {
   const id = LOGO_MAP[name];
   if (!id) return '';
   return 'https://a.espncdn.com/i/teamlogos/ncaa/500/' + id + '.png';
+}
+
+function getDefaultSidebarDateKey(dates) {
+  // Determine today's date in Eastern Time.
+  let todayStr;
+  try {
+    const etFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+    todayStr = etFormatter.format(new Date());
+  } catch(e) {
+    const now = new Date();
+    const etNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (-4 * 3600000));
+    todayStr = etNow.toISOString().slice(0, 10);
+  }
+  return dates.find(d => d === todayStr)
+    || dates.find(d => d > todayStr)
+    || dates[dates.length - 1]
+    || null;
+}
+
+function setSidebarDate(dateKey) {
+  selectedSidebarDateKey = dateKey || null;
+  renderSidebar();
+  if (selectedSidebarDateKey && LIVE_SCORES_URL) fetchLiveScores(selectedSidebarDateKey);
 }
 
 function renderSidebar() {
@@ -1258,24 +1397,16 @@ function renderSidebar() {
     return;
   }
 
-  // Determine today's date in Eastern Time
-  // Use Intl API for reliable timezone conversion
-  let todayStr;
-  try {
-    const etFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
-    todayStr = etFormatter.format(new Date()); // returns YYYY-MM-DD format (en-CA locale)
-  } catch(e) {
-    // Fallback: manual ET offset (EDT = UTC-4)
-    const now = new Date();
-    const etNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (-4 * 3600000));
-    todayStr = etNow.toISOString().slice(0, 10);
+  const dates = Object.keys(appData.schedule).sort();
+  if (!dates.length) {
+    document.getElementById('sidebar').style.display = 'none';
+    return;
   }
 
-  const dates = Object.keys(appData.schedule).sort();
-  // Priority: show today if available, then next upcoming day, then most recent day
-  let dateKey = dates.find(d => d === todayStr)
-    || dates.find(d => d > todayStr)
-    || dates[dates.length - 1];
+  if (!selectedSidebarDateKey || !dates.includes(selectedSidebarDateKey)) {
+    selectedSidebarDateKey = getDefaultSidebarDateKey(dates);
+  }
+  const dateKey = selectedSidebarDateKey;
 
   if (!dateKey) {
     document.getElementById('sidebar').style.display = 'none';
@@ -1284,8 +1415,18 @@ function renderSidebar() {
 
   const day = appData.schedule[dateKey];
   const results = appData.results || {};
+  const liveScores = getSidebarLiveScores(dateKey);
+  if (LIVE_SCORES_URL && !Object.prototype.hasOwnProperty.call(liveScoresByDate, dateKey)) {
+    fetchLiveScores(dateKey);
+  }
 
-  document.getElementById('sidebar-date').textContent = day.label;
+  const optionsHtml = dates.map(date => {
+    const label = appData.schedule[date]?.label || date;
+    const selected = date === dateKey ? ' selected' : '';
+    return `<option value="${date}"${selected}>${esc(label)}</option>`;
+  }).join('');
+  document.getElementById('sidebar-date').innerHTML =
+    `<select class="sidebar-date-select" aria-label="Select tournament date" onchange="setSidebarDate(this.value)">${optionsHtml}</select>`;
 
   const html = day.games.map(sg => {
     const g = GAMES[sg.id];
@@ -1407,13 +1548,17 @@ window.addEventListener('DOMContentLoaded', () => {
         renderPills();
         renderLeaderboard();
         renderSidebar();
+        if (document.getElementById('view-bracket')?.classList.contains('active')) {
+          renderBracket();
+        }
       })
       .catch(() => {});
   }, 60000);
   // Poll live scores every 30 seconds (if Cloudflare Worker is configured)
   if (LIVE_SCORES_URL) {
-    fetchLiveScores();
-    setInterval(fetchLiveScores, 30000);
+    setInterval(() => {
+      if (selectedSidebarDateKey) fetchLiveScores(selectedSidebarDateKey);
+    }, 30000);
     fetchNews();
     setInterval(fetchNews, 300000); // refresh news every 5 minutes
   }

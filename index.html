@@ -68,6 +68,24 @@ header {
   padding: 0 24px; height: 148px;
 }
 
+.header-home {
+  display: flex; align-items: center; gap: 16px;
+  flex: 1; min-width: 0;
+  background: none; border: none; padding: 0;
+  color: inherit; cursor: pointer; text-align: left;
+}
+
+.header-home:focus-visible {
+  outline: 2px solid rgba(212,146,42,0.7);
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+
+.header-home:hover .h-title,
+.header-home:hover .h-logo {
+  filter: brightness(1.04);
+}
+
 .h-brand {
   font-family: var(--fd); font-weight: 900; font-size: 20px;
   letter-spacing: 0.12em; color: var(--orange); text-transform: uppercase; white-space: nowrap;
@@ -135,6 +153,40 @@ main { max-width: 1440px; margin: 0 auto; padding: 28px 20px; display: flex; gap
 
 /* LEADERBOARD */
 .lb-list { display: flex; flex-direction: column; gap: 7px; }
+.lb-updates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.update-card {
+  background: linear-gradient(145deg, rgba(17, 23, 38, 0.95), rgba(9, 13, 23, 0.94));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.update-kicker {
+  font-family: var(--fm);
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.update-main {
+  font-family: var(--fd);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+}
+.update-sub {
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 8px;
+}
 
 .lb-row {
   display: grid; grid-template-columns: 48px 1fr auto;
@@ -209,6 +261,12 @@ main { max-width: 1440px; margin: 0 auto; padding: 28px 20px; display: flex; gap
 .lb-breakdown { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 .lb-breakdown span { font-family: var(--fm); font-size: 15px; color: var(--muted); }
 .lb-breakdown .hit { color: var(--text); }
+.lb-outlook { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.lb-outlook span { font-family: var(--fm); font-size: 13px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.lb-outlook .ceiling { color: var(--gold); }
+.lb-outlook .alive { color: var(--green); }
+.lb-outlook .dead { color: var(--red); }
+.lb-outlook .tie-note { color: var(--cyan); }
 
 .lb-score { text-align: right; }
 .lb-pts { font-family: var(--fd); font-weight: 900; font-size: 39px; line-height: 1; }
@@ -224,6 +282,100 @@ main { max-width: 1440px; margin: 0 auto; padding: 28px 20px; display: flex; gap
 .bkt-controls label { font-family: var(--fd); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 select { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--fb); font-size: 19px; padding: 8px 12px; cursor: pointer; outline: none; }
 select:focus { border-color: var(--orange); }
+.compare-wrap {
+  background: linear-gradient(145deg, rgba(16, 22, 36, 0.98), rgba(10, 13, 24, 0.96));
+  border: 1px solid rgba(0,212,255,0.16);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.compare-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.compare-title {
+  font-family: var(--fd);
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.compare-sub {
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.compare-stat {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.compare-stat-val {
+  font-family: var(--fd);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+}
+.compare-stat-lbl {
+  font-family: var(--fm);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+}
+.compare-swings {
+  display: grid;
+  gap: 8px;
+}
+.compare-swing {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.compare-points {
+  font-family: var(--fd);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--orange);
+  line-height: 1;
+}
+.compare-swing-main {
+  font-family: var(--fb);
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.compare-swing-sub {
+  font-family: var(--fm);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.compare-empty {
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
 
 .bkt-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
 .bstat { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 72px; }
@@ -464,6 +616,41 @@ select:focus { border-color: var(--orange); }
 .callout-text { font-family: var(--fd); font-weight: 700; font-size: 24px; color: var(--text); }
 .callout-sub { font-family: var(--fm); font-size: 15px; color: var(--muted); margin-top: 4px; }
 .callout-empty { padding: 16px 14px; font-family: var(--fm); font-size: 16px; color: var(--muted); text-align: center; }
+.win-paths { padding: 8px 12px 12px; display: grid; gap: 8px; }
+.win-path {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 12px;
+}
+.win-path-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.win-path-name {
+  font-family: var(--fd);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.win-path-max {
+  font-family: var(--fd);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+.win-path-sub {
+  font-family: var(--fm);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 8px;
+  line-height: 1.5;
+}
 
 /* BRACKET STILL-ALIVE INDICATOR */
 .slot-alive    { border-color: rgba(212,146,42,0.25); background: rgba(212,146,42,0.04); }
@@ -496,7 +683,20 @@ select:focus { border-color: var(--orange); }
 .sidebar-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
 .sidebar-head-icon { font-size: 21px; }
 .sidebar-head-title { font-family: var(--fd); font-weight: 800; font-size: 19px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); }
-.sidebar-date { font-family: var(--fm); font-size: 14px; color: var(--muted); letter-spacing: 0.04em; padding: 0 16px; margin-top: 8px; text-transform: uppercase; }
+.sidebar-date { padding: 0 16px; margin-top: 8px; }
+.sidebar-date-select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--fm);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  text-transform: uppercase;
+}
+.sidebar-date-select:focus { border-color: var(--orange); }
 .sg-list { padding: 6px 0; }
 .sg-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.15s; cursor: default; }
 .sg-item:last-child { border-bottom: none; }
@@ -535,6 +735,8 @@ select:focus { border-color: var(--orange); }
   main { flex-direction: column; }
   .sidebar { width: 100%; position: static; max-height: none; order: 1; }
   .sidebar-right { display: none; }
+  .lb-updates { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
   .sg-list { display: grid; grid-template-columns: 1fr 1fr; }
   .sg-item { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.03); }
   header { position: relative; height: auto; padding: 12px 16px; gap: 10px; flex-wrap: wrap; }
@@ -552,9 +754,11 @@ select:focus { border-color: var(--orange); }
 <body>
 
 <header>
-  <img src="techne-logo.png" alt="Techne Media" class="h-logo" />
-  <div class="h-sep"></div>
-  <div class="h-title">Techne 2026 Bracket Challenge</div>
+  <button class="header-home" type="button" onclick="showView('leaderboard')" aria-label="Go to leaderboard">
+    <img src="techne-logo.png" alt="Techne Media" class="h-logo" />
+    <div class="h-sep"></div>
+    <div class="h-title">Techne 2026 Bracket Challenge</div>
+  </button>
   <nav>
     <button class="active" id="nav-leaderboard" onclick="showView('leaderboard')">Leaderboard</button>
     <button id="nav-bracket"     onclick="showView('bracket')">Bracket</button>
@@ -571,7 +775,7 @@ select:focus { border-color: var(--orange); }
     <div class="sidebar-card">
       <div class="sidebar-head">
         <span class="sidebar-head-icon">🏀</span>
-        <span class="sidebar-head-title">Today's Games</span>
+        <span class="sidebar-head-title">Tournament Games</span>
       </div>
       <div class="sidebar-date" id="sidebar-date"></div>
       <div class="sg-list" id="sg-list">
@@ -591,6 +795,7 @@ select:focus { border-color: var(--orange); }
     <div class="section-meta" id="lb-meta">Loading...</div>
     <div id="hva-bar"></div>
     <div class="round-pills" id="round-pills"></div>
+    <div class="lb-updates" id="lb-updates"></div>
     <div class="lb-list" id="lb-list">
       <div class="loading">Loading bracket data...</div>
     </div>
@@ -607,6 +812,10 @@ select:focus { border-color: var(--orange); }
       <label>Viewing:</label>
       <select id="bkt-select" onchange="renderBracket()">
         <option value="">Select a participant...</option>
+      </select>
+      <label>Compare:</label>
+      <select id="compare-select" onchange="renderBracket()">
+        <option value="">No comparison</option>
       </select>
     </div>
     <div id="bkt-content">
@@ -730,6 +939,13 @@ select:focus { border-color: var(--orange); }
     </div>
     <div class="sidebar-card" style="margin-top:12px;">
       <div class="sidebar-head">
+        <span class="sidebar-head-icon">🏁</span>
+        <span class="sidebar-head-title">Who Can Still Win</span>
+      </div>
+      <div id="wcw-list" class="win-paths"></div>
+    </div>
+    <div class="sidebar-card" style="margin-top:12px;">
+      <div class="sidebar-head">
         <span class="sidebar-head-icon">📰</span>
         <span class="sidebar-head-title">Tournament News</span>
       </div>
@@ -739,6 +955,7 @@ select:focus { border-color: var(--orange); }
 
 </main>
 
+<script src="bracket-config.js"></script>
 <script src="app.js"></script>
 
 </body>
