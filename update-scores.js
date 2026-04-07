@@ -83,11 +83,16 @@ async function main() {
   const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   const results = data.results || {};
 
-  // Determine which dates to check — today and yesterday (for late games)
+  // Determine which dates to check.
+  // Primary behavior: backfill any scheduled dates that still have unresolved games.
+  // Fallback: also check today and yesterday for live or newly completed games.
   const now = new Date();
   const today = now.toISOString().slice(0, 10).replace(/-/g, '');
   const yesterday = new Date(now - 86400000).toISOString().slice(0, 10).replace(/-/g, '');
-  const datesToCheck = [today, yesterday];
+  const unresolvedScheduleDates = Object.entries(data.schedule || {})
+    .filter(([, day]) => (day.games || []).some(game => !results[game.id]))
+    .map(([date]) => date.replace(/-/g, ''));
+  const datesToCheck = Array.from(new Set([...unresolvedScheduleDates, today, yesterday])).sort();
 
   let newResults = 0;
   const loggedGames = [];
