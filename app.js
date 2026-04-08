@@ -423,6 +423,407 @@ function renderWhoCanStillWin(rows) {
   }).join('');
 }
 
+function fmtPct(num, den) {
+  return den ? Math.round((num / den) * 100) : 0;
+}
+
+function teamSeed(team) {
+  if (!team) return null;
+  for (const g of Object.values(GAMES)) {
+    if (g.top === team && g.tSeed != null) return g.tSeed;
+    if (g.bot === team && g.bSeed != null) return g.bSeed;
+  }
+  return null;
+}
+
+function getPairwiseDifferenceCount(a, b) {
+  let diff = 0;
+  for (const gid of Object.keys(GAMES)) {
+    if (a.picks?.[gid] && b.picks?.[gid] && a.picks[gid] !== b.picks[gid]) diff++;
+  }
+  return diff;
+}
+
+function getResultsViewModel(rows, results) {
+  const withPicks = rows.filter(p => hasPicks(p));
+  const humans = withPicks.filter(p => p.type !== 'ai');
+  const ais = withPicks.filter(p => p.type === 'ai');
+  const winner = withPicks[0];
+  const runnerUp = withPicks[1];
+  const third = withPicks[2];
+  const champion = results.NC;
+  const scoredGames = Object.entries(results)
+    .filter(([gid]) => GAMES[gid] && RPTS[GAMES[gid].round])
+    .map(([gid, winnerTeam]) => ({ gid, winner: winnerTeam, game: GAMES[gid] }));
+
+  const championBoard = {};
+  withPicks.forEach(p => {
+    const team = p.picks?.NC || 'No champion';
+    if (!championBoard[team]) championBoard[team] = [];
+    championBoard[team].push(p.name);
+  });
+
+  const exactChampionPickers = withPicks.filter(p => p.picks?.NC === champion);
+  const winnerMargin = runnerUp ? winner.sc.total - runnerUp.sc.total : winner.sc.total;
+  const humanAvg = humans.length ? Math.round(humans.reduce((sum, p) => sum + p.sc.total, 0) / humans.length) : 0;
+  const aiAvg = ais.length ? Math.round(ais.reduce((sum, p) => sum + p.sc.total, 0) / ais.length) : 0;
+
+  const winnerEdges = scoredGames
+    .filter(({ gid, winner: winnerTeam }) => winner.picks?.[gid] === winnerTeam)
+    .map(({ gid, winner: winnerTeam, game }) => {
+      const correctCount = withPicks.filter(p => p.picks?.[gid] === winnerTeam).length;
+      return {
+        gid,
+        winner: winnerTeam,
+        round: game.round,
+        pts: RPTS[game.round],
+        correctCount,
+        edge: (withPicks.length - correctCount) * RPTS[game.round]
+      };
+    })
+    .sort((a, b) => b.edge - a.edge || b.pts - a.pts)
+    .slice(0, 6);
+
+  const consensusTraps = scoredGames
+    .map(({ gid, winner: winnerTeam, game }) => {
+      const [t1, t2] = getTeams(gid, null, results);
+      const correctCount = withPicks.filter(p => p.picks?.[gid] === winnerTeam).length;
+      return {
+        gid,
+        winner: winnerTeam,
+        loser: winnerTeam === t1 ? t2 : t1,
+        round: game.round,
+        pts: RPTS[game.round],
+        correctCount,
+        wrongCount: withPicks.length - correctCount
+      };
+    })
+    .sort((a, b) => b.wrongCount - a.wrongCount || b.pts - a.pts)
+    .slice(0, 6);
+
+  const rareHits = consensusTraps
+    .filter(game => game.correctCount > 0)
+    .sort((a, b) => a.correctCount - b.correctCount || b.pts - a.pts)
+    .slice(0, 6)
+    .map(game => ({
+      ...game,
+      hitters: withPicks.filter(p => p.picks?.[game.gid] === game.winner).map(p => p.name)
+    }));
+
+  const aiHumanSplit = scoredGames
+    .map(({ gid, winner: winnerTeam, game }) => {
+      const aiHits = ais.filter(p => p.picks?.[gid] === winnerTeam).length;
+      const humanHits = humans.filter(p => p.picks?.[gid] === winnerTeam).length;
+      return {
+        gid,
+        winner: winnerTeam,
+        round: game.round,
+        aiHits,
+        humanHits,
+        aiRate: fmtPct(aiHits, ais.length),
+        humanRate: fmtPct(humanHits, humans.length),
+        gap: fmtPct(aiHits, ais.length) - fmtPct(humanHits, humans.length)
+      };
+    })
+    .sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap))
+    .slice(0, 6);
+
+  const roundOrder = ['r1', 'r2', 's16', 'e8', 'ff2', 'nc'];
+  const roundLeaders = roundOrder.map(round => {
+    const max = Math.max(...withPicks.map(p => p.sc.by?.[round] || 0));
+    return {
+      round,
+      pts: max,
+      leaders: withPicks.filter(p => (p.sc.by?.[round] || 0) === max && max > 0).map(p => p.name)
+    };
+  }).filter(item => item.pts > 0);
+
+  const bracketStyles = withPicks.map(p => {
+    let contrarian = 0;
+    let upsetHits = 0;
+    let lateRoundPoints = (p.sc.by?.ff2 || 0) + (p.sc.by?.nc || 0);
+
+    scoredGames.forEach(({ gid, winner: winnerTeam }) => {
+      const counts = {};
+      withPicks.forEach(row => {
+        const pick = row.picks?.[gid];
+        if (pick) counts[pick] = (counts[pick] || 0) + 1;
+      });
+      const majorityPick = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+      if (majorityPick && p.picks?.[gid] && p.picks[gid] !== majorityPick) contrarian++;
+
+      const [t1, t2] = getTeams(gid, null, results);
+      const loser = winnerTeam === t1 ? t2 : t1;
+      const winnerSeed = teamSeed(winnerTeam);
+      const loserSeed = teamSeed(loser);
+      const upset = winnerSeed != null && loserSeed != null && winnerSeed > loserSeed;
+      if (upset && p.picks?.[gid] === winnerTeam) upsetHits++;
+    });
+
+    return { name: p.name, type: p.type, contrarian, upsetHits, lateRoundPoints, champHit: p.picks?.NC === champion };
+  });
+
+  const mostContrarian = [...bracketStyles].sort((a, b) => b.contrarian - a.contrarian)[0];
+  const chalkiest = [...bracketStyles].sort((a, b) => a.contrarian - b.contrarian)[0];
+  const upsetKings = [...bracketStyles].sort((a, b) => b.upsetHits - a.upsetHits).slice(0, 2);
+  const lateClosers = [...bracketStyles].sort((a, b) => b.lateRoundPoints - a.lateRoundPoints).slice(0, 2);
+
+  let widestAI = null;
+  let closestAI = null;
+  let widestCross = null;
+  for (let i = 0; i < withPicks.length; i++) {
+    for (let j = i + 1; j < withPicks.length; j++) {
+      const a = withPicks[i];
+      const b = withPicks[j];
+      const diff = getPairwiseDifferenceCount(a, b);
+      const pair = { a: a.name, b: b.name, diff };
+      if (a.type === 'ai' && b.type === 'ai') {
+        if (!widestAI || diff > widestAI.diff) widestAI = pair;
+        if (!closestAI || diff < closestAI.diff) closestAI = pair;
+      }
+      if (a.type !== b.type && (!widestCross || diff > widestCross.diff)) widestCross = pair;
+    }
+  }
+
+  return {
+    withPicks,
+    winner,
+    runnerUp,
+    third,
+    champion,
+    championBoard,
+    exactChampionPickers,
+    winnerMargin,
+    humanAvg,
+    aiAvg,
+    winnerEdges,
+    consensusTraps,
+    rareHits,
+    aiHumanSplit,
+    roundLeaders,
+    mostContrarian,
+    chalkiest,
+    upsetKings,
+    lateClosers,
+    widestAI,
+    closestAI,
+    widestCross,
+    humans,
+    ais
+  };
+}
+
+function renderResultsView(rowsOverride, resultsOverride) {
+  const host = document.getElementById('results-content');
+  if (!host || !appData) return;
+
+  const results = resultsOverride || appData.results || {};
+  const rows = rowsOverride || getParticipantRows(results);
+  if (!isTournamentComplete(results)) {
+    host.innerHTML = '<div class="empty-state">Final Results unlock after the championship game is logged</div>';
+    return;
+  }
+
+  const model = getResultsViewModel(rows, results);
+  const championLogo = teamLogo(model.champion);
+  const championBoardHtml = Object.entries(model.championBoard)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([team, names]) => `
+      <div class="result-chip-group">
+        <div class="result-chip-head">
+          ${teamLogo(team) ? `<img class="result-chip-logo" src="${teamLogo(team)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span>${esc(team)}</span>
+          <span class="result-chip-count">${names.length}</span>
+        </div>
+        <div class="result-chip-sub">${esc(names.join(', '))}</div>
+      </div>
+    `).join('');
+
+  const pivotalHtml = model.winnerEdges.map(item => `
+    <div class="story-row">
+      <div class="story-main">${item.gid} · ${esc(item.winner)}</div>
+      <div class="story-meta">${RLABELS[item.round]} · ${item.pts} pts · only ${item.correctCount}/${model.withPicks.length} got it right</div>
+    </div>
+  `).join('');
+
+  const trapHtml = model.consensusTraps.map(item => `
+    <div class="story-row">
+      <div class="story-main">${esc(item.winner)} over ${esc(item.loser)}</div>
+      <div class="story-meta">${item.gid} · ${RLABELS[item.round]} · ${item.wrongCount}/${model.withPicks.length} missed it</div>
+    </div>
+  `).join('');
+
+  const rareHitHtml = model.rareHits.map(item => `
+    <div class="story-row">
+      <div class="story-main">${esc(item.winner)} landed for ${item.hitters.length === 1 ? item.hitters[0] : item.hitters.join(', ')}</div>
+      <div class="story-meta">${item.gid} · ${RLABELS[item.round]} · ${item.correctCount}/${model.withPicks.length} correct</div>
+    </div>
+  `).join('');
+
+  const splitHtml = model.aiHumanSplit.map(item => `
+    <div class="split-row">
+      <div>
+        <div class="split-game">${item.gid} · ${esc(item.winner)}</div>
+        <div class="split-sub">${RLABELS[item.round]} · ${item.gap > 0 ? 'AI read this better' : 'Humans read this better'}</div>
+      </div>
+      <div class="split-metrics">
+        <span>AI ${item.aiHits}/${model.ais.length} (${item.aiRate}%)</span>
+        <span>Humans ${item.humanHits}/${model.humans.length} (${item.humanRate}%)</span>
+      </div>
+    </div>
+  `).join('');
+
+  const roundLeaderHtml = model.roundLeaders.map(item => `
+    <div class="round-card">
+      <div class="round-card-top">
+        <span>${RLABELS[item.round]}</span>
+        <span>${item.pts}</span>
+      </div>
+      <div class="round-card-sub">${esc(item.leaders.join(', '))}</div>
+    </div>
+  `).join('');
+
+  const standingsHtml = model.withPicks.map((p, idx) => `
+    <div class="standing-row">
+      <div class="standing-rank">${idx + 1}</div>
+      <div class="standing-name">${esc(p.name)} <span class="standing-type">${p.type === 'ai' ? 'AI' : 'Human'}</span></div>
+      <div class="standing-champ">${esc(p.picks?.NC || '—')}</div>
+      <div class="standing-score">${p.sc.total}</div>
+    </div>
+  `).join('');
+
+  host.innerHTML = `
+    <div class="results-hero">
+      <div class="results-hero-copy">
+        <div class="results-kicker">Season Complete</div>
+        <div class="results-title">${esc(model.winner.name)} won the pool. ${esc(model.champion)} won the title.</div>
+        <div class="results-sub">The pool turned on one outcome more than any other: only ${model.exactChampionPickers.length} bracket picked ${esc(model.champion)} to win it all, and that bracket belonged to ${esc(model.winner.name)}.</div>
+      </div>
+      <div class="results-hero-side">
+        <div class="results-hero-champ">${championLogo ? `<img class="results-hero-logo" src="${championLogo}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}</div>
+        <div class="results-hero-stat">${esc(model.champion)}</div>
+        <div class="results-hero-label">National Champion</div>
+      </div>
+    </div>
+
+    <div class="results-stat-grid">
+      <div class="results-stat-card">
+        <div class="results-stat-value">${model.winner.sc.total}</div>
+        <div class="results-stat-label">Winning Score</div>
+        <div class="results-stat-sub">${esc(model.winner.name)} finished ${model.winnerMargin} points clear of ${esc(model.runnerUp.name)}</div>
+      </div>
+      <div class="results-stat-card">
+        <div class="results-stat-value">${model.exactChampionPickers.length}/${model.withPicks.length}</div>
+        <div class="results-stat-label">Correct Champion Picks</div>
+        <div class="results-stat-sub">${model.exactChampionPickers.map(p => esc(p.name)).join(', ') || 'Nobody'} had ${esc(model.champion)} cutting down the nets</div>
+      </div>
+      <div class="results-stat-card">
+        <div class="results-stat-value">${model.aiAvg}</div>
+        <div class="results-stat-label">Average AI Score</div>
+        <div class="results-stat-sub">Humans averaged ${model.humanAvg}, so the models finished ${model.aiAvg - model.humanAvg} points ahead on average</div>
+      </div>
+      <div class="results-stat-card">
+        <div class="results-stat-value">${model.upsetKings[0]?.upsetHits || 0}</div>
+        <div class="results-stat-label">Best Upset Read</div>
+        <div class="results-stat-sub">${esc(model.upsetKings.map(x => x.name).join(', '))} nailed the most actual upset winners</div>
+      </div>
+    </div>
+
+    <div class="results-podium">
+      ${[model.winner, model.runnerUp, model.third].map((p, idx) => `
+        <div class="podium-card podium-${idx + 1}">
+          <div class="podium-place">${idx === 0 ? '1st' : idx === 1 ? '2nd' : '3rd'}</div>
+          <div class="podium-name">${esc(p.name)}</div>
+          <div class="podium-score">${p.sc.total}</div>
+          <div class="podium-sub">${p.type === 'ai' ? 'AI model' : 'Team member'} · champion pick: ${esc(p.picks?.NC || '—')}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="results-two-col">
+      <div class="results-panel">
+        <div class="results-panel-title">Why ${esc(model.winner.name)} Won</div>
+        <div class="results-panel-sub">The biggest edges came when the field went the other way in the highest-leverage games.</div>
+        <div class="story-list">${pivotalHtml}</div>
+      </div>
+      <div class="results-panel">
+        <div class="results-panel-title">Champion Pick Map</div>
+        <div class="results-panel-sub">The pool clustered around Duke and Arizona. Michigan belonged to exactly one bracket.</div>
+        <div class="result-chip-grid">${championBoardHtml}</div>
+      </div>
+    </div>
+
+    <div class="results-two-col">
+      <div class="results-panel">
+        <div class="results-panel-title">Bracket Breakers</div>
+        <div class="results-panel-sub">These were the results that did the most damage to the field’s assumptions.</div>
+        <div class="story-list">${trapHtml}</div>
+      </div>
+      <div class="results-panel">
+        <div class="results-panel-title">Needle-Threaders</div>
+        <div class="results-panel-sub">A few outcomes landed for only one or two brackets. Those calls separated people fast.</div>
+        <div class="story-list">${rareHitHtml}</div>
+      </div>
+    </div>
+
+    <div class="results-panel">
+      <div class="results-panel-title">AI vs Humans</div>
+      <div class="results-panel-sub">The models beat the team on average and widened the gap as the rounds got heavier.</div>
+      <div class="results-mini-grid">
+        <div class="mini-metric"><span>AI round hit rate</span><strong>${fmtPct(model.ais.reduce((sum, p) => sum + (p.acc?.correct || 0), 0), model.ais.length * Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]).length)}%</strong></div>
+        <div class="mini-metric"><span>Human round hit rate</span><strong>${fmtPct(model.humans.reduce((sum, p) => sum + (p.acc?.correct || 0), 0), model.humans.length * Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]).length)}%</strong></div>
+        <div class="mini-metric"><span>AI title hits</span><strong>${model.exactChampionPickers.filter(p => p.type === 'ai').length}/${model.ais.length}</strong></div>
+        <div class="mini-metric"><span>Human title hits</span><strong>${model.exactChampionPickers.filter(p => p.type !== 'ai').length}/${model.humans.length}</strong></div>
+      </div>
+      <div class="split-list">${splitHtml}</div>
+    </div>
+
+    <div class="results-two-col">
+      <div class="results-panel">
+        <div class="results-panel-title">Bracket Fingerprints</div>
+        <div class="results-fingerprint-grid">
+          <div class="fingerprint-card">
+            <div class="fingerprint-kicker">Most Contrarian</div>
+            <div class="fingerprint-main">${esc(model.mostContrarian.name)}</div>
+            <div class="fingerprint-sub">${model.mostContrarian.contrarian} picks against the field majority</div>
+          </div>
+          <div class="fingerprint-card">
+            <div class="fingerprint-kicker">Most Chalk</div>
+            <div class="fingerprint-main">${esc(model.chalkiest.name)}</div>
+            <div class="fingerprint-sub">Stayed closest to the field consensus all tournament</div>
+          </div>
+          <div class="fingerprint-card">
+            <div class="fingerprint-kicker">Most Split AI Pair</div>
+            <div class="fingerprint-main">${esc(model.widestAI.a)} vs ${esc(model.widestAI.b)}</div>
+            <div class="fingerprint-sub">${model.widestAI.diff} different picks</div>
+          </div>
+          <div class="fingerprint-card">
+            <div class="fingerprint-kicker">Biggest Human/AI Gap</div>
+            <div class="fingerprint-main">${esc(model.widestCross.a)} vs ${esc(model.widestCross.b)}</div>
+            <div class="fingerprint-sub">${model.widestCross.diff} different picks</div>
+          </div>
+        </div>
+      </div>
+      <div class="results-panel">
+        <div class="results-panel-title">Round Leaders</div>
+        <div class="round-card-grid">${roundLeaderHtml}</div>
+        <div class="results-panel-sub" style="margin-top:14px;">Late-round finishers: ${esc(model.lateClosers.map(x => `${x.name} (${x.lateRoundPoints})`).join(', '))}</div>
+      </div>
+    </div>
+
+    <div class="results-panel">
+      <div class="results-panel-title">Final Standings</div>
+      <div class="standings-head">
+        <span>Rank</span>
+        <span>Bracket</span>
+        <span>Champion Pick</span>
+        <span>Pts</span>
+      </div>
+      <div class="standings-list">${standingsHtml}</div>
+    </div>
+  `;
+}
+
 function getFutureSwingGames(primary, secondary, results) {
   const swings = [];
   for (const [gid, g] of Object.entries(GAMES)) {
@@ -502,7 +903,9 @@ function showView(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.getElementById('nav-'  + name).classList.add('active');
-  if (name === 'bracket') {
+  if (name === 'results') {
+    renderResultsView();
+  } else if (name === 'bracket') {
     renderBracket();
   } else {
     const champEl = document.getElementById('sidebar-champ');
@@ -598,85 +1001,97 @@ function renderLeaderboard() {
   const winPathsTitle = document.getElementById('wcw-title');
   if (winPathsTitle) winPathsTitle.textContent = isTournamentComplete(results) ? 'Final Podium' : 'Who Can Still Win';
   document.getElementById('wcw-list').innerHTML = renderWhoCanStillWin(rows);
+  renderResultsView(rows, results);
 
   // === BEST PICK / WORST MISS CALLOUTS (right sidebar) ===
   const calloutsEl = document.getElementById('lb-callouts');
   const playedGames = Object.keys(results).filter(gid => GAMES[gid] && RPTS[GAMES[gid].round]);
   if (playedGames.length > 0) {
-    // Best pick = correctly called the biggest upset (highest seed diff where lower seed won)
-    let bestUpsetGid = null;
-    let bestSeedDiff = 0;
-    let bestWho = [];
-    let worstGame = null;
-    let worstMissCount = 0;
-    for (const gid of playedGames) {
-      const g = GAMES[gid];
-      const winner = results[gid];
-      // Calculate seed differential (only for R1 games with seeds)
-      if (g.tSeed && g.bSeed) {
-        const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
-        const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
-        // It's an upset if the higher seed number (worse seed) won
-        if (winnerSeed > loserSeed) {
-          const diff = winnerSeed - loserSeed;
-          if (diff > bestSeedDiff) {
-            // Find who called it
-            const gotIt = [];
-            rows.forEach(p => {
-              if (!hasPicks(p)) return;
-              if (p.picks[gid] === winner) gotIt.push(p.name);
-            });
-            if (gotIt.length > 0) {
-              bestSeedDiff = diff;
-              bestUpsetGid = gid;
-              bestWho = gotIt;
+    if (isTournamentComplete(results)) {
+      const styleRows = getResultsViewModel(rows, results);
+      const champPickers = styleRows.exactChampionPickers.map(p => p.name).join(', ') || 'Nobody';
+      const finalCallouts = [
+        `<div class="callout"><div class="callout-icon">🏆</div><div class="callout-label">Winning Bracket</div><div class="callout-text">${esc(styleRows.winner.name)}</div><div class="callout-sub">${styleRows.winner.sc.total} points · won by ${styleRows.winnerMargin}</div></div>`,
+        `<div class="callout"><div class="callout-icon">🎯</div><div class="callout-label">Correct Champion Pick</div><div class="callout-text">${esc(champPickers)}</div><div class="callout-sub">${esc(results.NC)} was the only title pick that paid off</div></div>`,
+        `<div class="callout"><div class="callout-icon">🧨</div><div class="callout-label">Upset Hunters</div><div class="callout-text">${esc(styleRows.upsetKings.map(x => x.name).join(', '))}</div><div class="callout-sub">${styleRows.upsetKings[0]?.upsetHits || 0} actual upset hits</div></div>`
+      ];
+      calloutsEl.innerHTML = finalCallouts.join('');
+    } else {
+      // Best pick = correctly called the biggest upset (highest seed diff where lower seed won)
+      let bestUpsetGid = null;
+      let bestSeedDiff = 0;
+      let bestWho = [];
+      let worstGame = null;
+      let worstMissCount = 0;
+      for (const gid of playedGames) {
+        const g = GAMES[gid];
+        const winner = results[gid];
+        // Calculate seed differential (only for R1 games with seeds)
+        if (g.tSeed && g.bSeed) {
+          const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
+          const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
+          // It's an upset if the higher seed number (worse seed) won
+          if (winnerSeed > loserSeed) {
+            const diff = winnerSeed - loserSeed;
+            if (diff > bestSeedDiff) {
+              // Find who called it
+              const gotIt = [];
+              rows.forEach(p => {
+                if (!hasPicks(p)) return;
+                if (p.picks[gid] === winner) gotIt.push(p.name);
+              });
+              if (gotIt.length > 0) {
+                bestSeedDiff = diff;
+                bestUpsetGid = gid;
+                bestWho = gotIt;
+              }
             }
           }
         }
+        // Worst miss = most people got it wrong
+        let missedIt = 0;
+        rows.forEach(p => {
+          if (!hasPicks(p)) return;
+          if (p.picks[gid] !== results[gid]) missedIt++;
+        });
+        if (missedIt > worstMissCount) {
+          worstMissCount = missedIt; worstGame = gid;
+        }
       }
-      // Worst miss = most people got it wrong
-      let missedIt = 0;
-      rows.forEach(p => {
-        if (!hasPicks(p)) return;
-        if (p.picks[gid] !== results[gid]) missedIt++;
-      });
-      if (missedIt > worstMissCount) {
-        worstMissCount = missedIt; worstGame = gid;
+      let calloutsHtml = '';
+      if (bestUpsetGid && bestWho.length > 0) {
+        const g = GAMES[bestUpsetGid];
+        const winner = results[bestUpsetGid];
+        const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
+        const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
+        calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called #${winnerSeed} ${esc(winner)} over #${loserSeed} in ${bestUpsetGid}</div></div>`;
       }
-    }
-    let calloutsHtml = '';
-    if (bestUpsetGid && bestWho.length > 0) {
-      const g = GAMES[bestUpsetGid];
-      const winner = results[bestUpsetGid];
-      const winnerSeed = winner === g.top ? g.tSeed : g.bSeed;
-      const loserSeed = winner === g.top ? g.bSeed : g.tSeed;
-      calloutsHtml += `<div class="callout"><div class="callout-icon">🔥</div><div class="callout-label">Best Pick</div><div class="callout-text">${bestWho.join(', ')}</div><div class="callout-sub">Called #${winnerSeed} ${esc(winner)} over #${loserSeed} in ${bestUpsetGid}</div></div>`;
-    }
-    if (worstGame && worstMissCount > rows.filter(p=>hasPicks(p)).length / 2) {
-      const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
-      calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
-    }
-    // "Still alive" — who has the most unique teams in their bracket that are still in the tournament
-    // A team is "eliminated" if they lost any game in the results
-    const eliminatedTeams = getEliminatedTeams(results);
+      if (worstGame && worstMissCount > rows.filter(p=>hasPicks(p)).length / 2) {
+        const totalWithPicks = rows.filter(p=>hasPicks(p)).length;
+        calloutsHtml += `<div class="callout"><div class="callout-icon">💀</div><div class="callout-label">Biggest Miss</div><div class="callout-text">${worstMissCount} of ${totalWithPicks} wrong</div><div class="callout-sub">${esc(results[worstGame])} won ${worstGame}</div></div>`;
+      }
+      // "Still alive" — who has the most unique teams in their bracket that are still in the tournament
+      // A team is "eliminated" if they lost any game in the results
+      const eliminatedTeams = getEliminatedTeams(results);
 
-    let bestAlive = null;
-    let bestAliveCount = 0;
-    const withPicks = rows.filter(p => hasPicks(p));
-    withPicks.forEach(p => {
-      // Get all unique teams this person picked anywhere in their bracket
-      const pickedTeams = new Set(Object.values(p.picks));
-      // Count how many of those teams are still alive (not eliminated)
-      let alive = 0;
-      pickedTeams.forEach(team => {
-        if (team && !eliminatedTeams.has(team)) alive++;
+      let bestAlive = null;
+      let bestAliveCount = 0;
+      const withPicks = rows.filter(p => hasPicks(p));
+      withPicks.forEach(p => {
+        // Get all unique teams this person picked anywhere in their bracket
+        const pickedTeams = new Set(Object.values(p.picks));
+        // Count how many of those teams are still alive (not eliminated)
+        let alive = 0;
+        pickedTeams.forEach(team => {
+          if (team && !eliminatedTeams.has(team)) alive++;
+        });
+        if (alive > bestAliveCount) { bestAliveCount = alive; bestAlive = p.name; }
       });
-      if (alive > bestAliveCount) { bestAliveCount = alive; bestAlive = p.name; }
-    });
-    if (bestAlive) {
-      calloutsHtml += `<div class="callout"><div class="callout-icon">🎯</div><div class="callout-label">Healthiest Bracket</div><div class="callout-text">${esc(bestAlive)}</div><div class="callout-sub">${bestAliveCount} teams still alive</div></div>`;
+      if (bestAlive) {
+        calloutsHtml += `<div class="callout"><div class="callout-icon">🎯</div><div class="callout-label">Healthiest Bracket</div><div class="callout-text">${esc(bestAlive)}</div><div class="callout-sub">${bestAliveCount} teams still alive</div></div>`;
+      }
+      calloutsEl.innerHTML = calloutsHtml;
     }
-    calloutsEl.innerHTML = calloutsHtml;
   } else {
     calloutsEl.innerHTML = '<div class="callout-empty">Insights will appear once Round of 64 results are logged</div>';
   }
@@ -1433,6 +1848,9 @@ function teamLogo(name) {
 }
 
 function getDefaultSidebarDateKey(dates) {
+  if (isTournamentComplete(appData?.results || {})) {
+    return dates[dates.length - 1] || null;
+  }
   // Determine today's date in Eastern Time.
   let todayStr;
   try {
@@ -1522,8 +1940,12 @@ function renderSidebar() {
 
     // Show scores for live, ESPN-final, and data.json-final games
     const showScores = isLive || isFinal;
-    const score1 = showScores && live1 ? '<span class="sg-score">' + live1.score + '</span>' : '';
-    const score2 = showScores && live2 ? '<span class="sg-score">' + live2.score + '</span>' : '';
+    const fallbackScore1 = sg.score1 != null ? String(sg.score1) : '';
+    const fallbackScore2 = sg.score2 != null ? String(sg.score2) : '';
+    const score1Val = live1?.score ?? fallbackScore1;
+    const score2Val = live2?.score ?? fallbackScore2;
+    const score1 = showScores && score1Val !== '' ? '<span class="sg-score">' + score1Val + '</span>' : '';
+    const score2 = showScores && score2Val !== '' ? '<span class="sg-score">' + score2Val + '</span>' : '';
 
     let metaHtml;
     if (isFinal) {

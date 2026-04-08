@@ -1296,6 +1296,75 @@
           "tv": "TBS"
         }
       ]
+    },
+    "2026-03-28": {
+      "label": "Saturday, March 28 — Elite 8",
+      "games": [
+        {
+          "id": "S15",
+          "time": "6:09 PM",
+          "tv": "TBS",
+          "score1": 59,
+          "score2": 71
+        },
+        {
+          "id": "W15",
+          "time": "8:49 PM",
+          "tv": "CBS",
+          "score1": 79,
+          "score2": 64
+        }
+      ]
+    },
+    "2026-03-29": {
+      "label": "Sunday, March 29 — Elite 8",
+      "games": [
+        {
+          "id": "M15",
+          "time": "2:15 PM",
+          "tv": "CBS",
+          "score1": 95,
+          "score2": 62
+        },
+        {
+          "id": "E15",
+          "time": "5:05 PM",
+          "tv": "TBS",
+          "score1": 72,
+          "score2": 73
+        }
+      ]
+    },
+    "2026-04-04": {
+      "label": "Saturday, April 4 — Final Four",
+      "games": [
+        {
+          "id": "FF5",
+          "time": "6:09 PM",
+          "tv": "CBS",
+          "score1": 62,
+          "score2": 71
+        },
+        {
+          "id": "FF6",
+          "time": "8:49 PM",
+          "tv": "CBS",
+          "score1": 73,
+          "score2": 91
+        }
+      ]
+    },
+    "2026-04-06": {
+      "label": "Monday, April 6 — Championship",
+      "games": [
+        {
+          "id": "NC",
+          "time": "9:20 PM",
+          "tv": "CBS",
+          "score1": 63,
+          "score2": 69
+        }
+      ]
     }
   }
 }
