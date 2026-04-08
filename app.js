@@ -212,6 +212,10 @@ function getRoundState(results) {
   return { rounds, done, fullyComplete, currentRound };
 }
 
+function isTournamentComplete(results) {
+  return !!results?.NC;
+}
+
 function getEliminatedTeams(results) {
   const eliminatedTeams = new Set();
   for (const [gid, winner] of Object.entries(results || {})) {
@@ -281,6 +285,7 @@ function renderTournamentPulse(rows, results) {
   const leader = withPicks[0];
   const latest = getLatestCompletedGame(results);
   const { currentRound } = getRoundState(results);
+  const tournamentComplete = isTournamentComplete(results);
   const deadChampions = withPicks.filter(p => p.picks?.NC && isTeamEliminated(p.picks.NC, results)).length;
   const trailingPack = withPicks.slice(1).filter(p => p.sc.total === withPicks[1]?.sc.total);
   let cushionMain = 'Solo board';
@@ -306,6 +311,44 @@ function renderTournamentPulse(rows, results) {
   });
   const sideLead = humanPts === aiPts ? 'Dead even' : humanPts > aiPts ? 'Humans ahead' : 'AI ahead';
   const sideGap = Math.abs(humanPts - aiPts);
+
+  if (tournamentComplete) {
+    const runnerUp = withPicks[1];
+    const winMargin = runnerUp ? leader.sc.total - runnerUp.sc.total : 0;
+    const pickedChampion = leader.picks?.NC === results.NC;
+    const sideWinner = humanPts === aiPts ? 'Draw' : humanPts > aiPts ? 'Humans win' : 'AI win';
+    const sideSummary = sideGap ? `${sideWinner} by ${sideGap} total points` : 'Humans and AI finished level on total points';
+    const cards = [
+      {
+        kicker: 'Tournament Final',
+        main: esc(results.NC),
+        sub: '2026 national champion'
+      },
+      {
+        kicker: 'Bracket Winner',
+        main: esc(leader.name),
+        sub: `${leader.sc.total} pts${runnerUp ? ` · won by ${winMargin}` : ''}`
+      },
+      {
+        kicker: 'Winning Ticket',
+        main: pickedChampion ? `Picked ${esc(results.NC)}` : `Picked ${esc(leader.picks?.NC || '—')}`,
+        sub: pickedChampion ? 'Closed it out with the correct champion pick' : 'Won the pool without the final champion pick'
+      },
+      {
+        kicker: 'Humans vs AI',
+        main: sideWinner,
+        sub: sideSummary
+      }
+    ];
+
+    return cards.map(card => `
+      <div class="update-card">
+        <div class="update-kicker">${card.kicker}</div>
+        <div class="update-main">${card.main}</div>
+        <div class="update-sub">${card.sub}</div>
+      </div>
+    `).join('');
+  }
 
   const cards = [
     {
@@ -340,9 +383,24 @@ function renderTournamentPulse(rows, results) {
 }
 
 function renderWhoCanStillWin(rows) {
+  const results = appData?.results || {};
   const withPicks = rows.filter(p => hasPicks(p));
   if (!withPicks.length) {
     return '<div class="callout-empty">Win paths will appear once picks are loaded</div>';
+  }
+
+  if (isTournamentComplete(results)) {
+    return withPicks.slice(0, 3).map((p, idx) => {
+      const place = idx === 0 ? 'Champion' : idx === 1 ? 'Runner-up' : 'Third place';
+      const champHit = p.picks?.NC === results.NC;
+      return `<div class="win-path">
+        <div class="win-path-top">
+          <div class="win-path-name">${esc(p.name)}</div>
+          <div class="win-path-max">${p.sc.total}</div>
+        </div>
+        <div class="win-path-sub">${place} · ${champHit ? `picked ${esc(results.NC)}` : `champion pick: ${esc(p.picks?.NC || '—')}`}</div>
+      </div>`;
+    }).join('');
   }
 
   const currentLead = withPicks[0].sc.total;
@@ -458,10 +516,12 @@ function showView(name) {
 function renderPills() {
   const results = appData?.results || {};
   const { rounds, fullyComplete, currentRound } = getRoundState(results);
+  const tournamentComplete = isTournamentComplete(results);
 
   const html = rounds.map(r => {
     let cls;
-    if (r === currentRound) cls = 'rpill-live';
+    if (tournamentComplete && r === 'nc') cls = 'rpill-final';
+    else if (r === currentRound) cls = 'rpill-live';
     else if (fullyComplete.has(r)) cls = 'rpill-past';
     else cls = 'rpill-soon';
     return `<div class="rpill ${cls}">${RLABELS[r]}</div>`;
@@ -480,7 +540,10 @@ function renderPills() {
     else if (diffMin < 1440) updatedText = `${Math.floor(diffMin/60)}h ago`;
     else updatedText = `${Math.floor(diffMin/1440)}d ago`;
   }
-  document.getElementById('lb-meta').textContent = `${played} game${played===1?'':'s'} complete · Updated ${updatedText}`;
+  document.getElementById('lb-meta').textContent =
+    tournamentComplete
+      ? `${played} games final · Tournament complete · Updated ${updatedText}`
+      : `${played} game${played===1?'':'s'} complete · Updated ${updatedText}`;
 }
 
 // ============================================================
@@ -532,6 +595,8 @@ function renderLeaderboard() {
     </div>`;
   } else { hvaEl.innerHTML = ''; }
   document.getElementById('lb-updates').innerHTML = renderTournamentPulse(rows, results);
+  const winPathsTitle = document.getElementById('wcw-title');
+  if (winPathsTitle) winPathsTitle.textContent = isTournamentComplete(results) ? 'Final Podium' : 'Who Can Still Win';
   document.getElementById('wcw-list').innerHTML = renderWhoCanStillWin(rows);
 
   // === BEST PICK / WORST MISS CALLOUTS (right sidebar) ===
